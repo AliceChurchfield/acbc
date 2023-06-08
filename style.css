@@ -1,0 +1,28 @@
+body
+{
+  color: white;
+  font-weight: thin;
+  background-color: hsl(345 30% 60%);
+  text-shadow: 0 2px 2px hsla(0, 0%, 0%, 0.7);
+}
+
+a
+{
+  color: hsl(50 90% 60%);
+  font-weight: bold;
+}
+
+a:hover
+{
+  color: hsl(50 90% 80%);
+}
+
+a:active
+{
+  color: hsl(345 90% 60%);
+}
+
+a:visited
+{
+  color: hsl(50 90% 45%);
+}
