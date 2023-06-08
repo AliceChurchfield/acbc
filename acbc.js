@@ -24,7 +24,7 @@
  * 
  */
 
-const ACBC_VERSION = "0.0.3";
+const ACBC_VERSION = "0.0.4";
 
 window.ACBC_Test = function()
 {
