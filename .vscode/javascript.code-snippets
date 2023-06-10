@@ -1,0 +1,38 @@
+{
+	"File header":
+	{
+		"description": "Standard JSDoc file header",
+		"prefix": "fileheader",
+		"body":
+		[
+			"/**",
+			" * $TM_FILENAME",
+			" * ",
+			" * @file",
+			" *   ${1:File description}",
+			" * @author   ${2:Alice Churchfield}",
+			" */",
+			"",
+			"",
+			"",
+			"$3",
+			"",
+		],
+	},
+	"Function header":
+	{
+		"description": "Standard JSDoc function header",
+		"prefix": "functionheader",
+		"body":
+		[
+			"/**",
+			" * ${1:Function description}",
+			" * @param {${3:ParamType} ${4:paramName}}",
+			" *   ${5:Parameter description}",
+			" * @returns ${2:ReturnType}",
+			" *   ${3:Return value description}",
+			" */",
+			"$6",
+		],
+	},
+}
