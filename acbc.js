@@ -42,7 +42,20 @@ function AddAcbcScript(src)
   AddScript(`https://alicechurchfield.github.io/acbc/${src}`);
 }
 
-AddAcbcScript("acbc-util.js");
+AddAcbcScript("acbc-main.js");
+//AddAcbcScript("acbc-util.js");
+AddAcbcScript("WearItem.js");
+AddAcbcScript("WhatSheLikes.js");
+AddAcbcScript("KidnapFix.js");
+AddAcbcScript("KidnapLeagueFix.js");
+AddAcbcScript("MagicFix.js");
+AddAcbcScript("PokerFix.js");
+AddAcbcScript("InventoryPatch.js");
+AddAcbcScript("MainHallPatch.js");
+AddAcbcScript("GamblingPatch.js");
+AddAcbcScript("KidnapPatch.js");
+AddAcbcScript("KidnapLeaguePatch.js");
+AddAcbcScript("MagicPatch.js");
 
 })();
 
