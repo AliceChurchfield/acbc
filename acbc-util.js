@@ -8,9 +8,12 @@
 
 
 
-const ACBC_VERSION = document.currentScript?.dataset.version;
-if (!ACBC_VERSION)
+if (!window.ACBC)
+{
   console.warn("Running acbc-util.js outside of acbc.js");
+  window.ACBC = {};
+}
+
 
 
 

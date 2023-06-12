@@ -8,11 +8,11 @@
 
 
 
-const ACBC_VERSION = document.currentScript?.dataset.version;
-if (!ACBC_VERSION)
+if (!window.ACBC)
+{
   console.warn("Running KidnapFix.js outside of acbc.js");
-
-if (!window.ACBC) window.ACBC = {};
+  window.ACBC = {};
+}
 
 
 KidnapUpperHandMoveAvailable = function(MoveType, DoMove) {
