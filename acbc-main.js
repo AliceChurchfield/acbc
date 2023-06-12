@@ -16,6 +16,7 @@ if (!window.ACBC)
   window.ACBC = {};
 }
 
+
 ACBC.Private =
 {
   BoopSneezeEnabled: true,

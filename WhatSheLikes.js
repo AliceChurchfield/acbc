@@ -8,11 +8,12 @@
 
 
 
-const ACBC_VERSION = document.currentScript?.dataset.version;
-if (!ACBC_VERSION)
+if (!window.ACBC)
+{
   console.warn("Running WhatSheLikes.js outside of acbc.js");
+  window.ACBC = {};
+}
 
-if (!window.ACBC) window.ACBC = {};
 
 /**
  * Logs to the console a filtered list of the things the given NPC likes

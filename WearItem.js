@@ -8,11 +8,12 @@
 
 
 
-const ACBC_VERSION = document.currentScript?.dataset.version;
-if (!ACBC_VERSION)
+if (!window.ACBC)
+{
   console.warn("Running WearItem.js outside of acbc.js");
+  window.ACBC = {};
+}
 
-if (!window.ACBC) window.ACBC = {};
 
 /**
  * Options to use when calling WearItem on a target character who's already
