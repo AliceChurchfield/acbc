@@ -15,7 +15,32 @@ if (!window.ACBC)
 }
 
 
+
 ACBC.Wiggling = false;
+ACBC.WiggleTimer = 0;
+ACBC.WiggleDuration = 2;  // in s
+ACBC.WiggleAmplitude = 10;
+
+
+/**
+ * Makes a character begin wiggling
+ * @param {Character|string} C
+ *   The character to wiggle
+ * @returns {void}
+ *   Nothing
+ */
+ACBC.BeginWiggling = function(C)
+{
+  C = ACBC.Find(C);
+  if (!C) return;
+  if (!C.ACBC) C.ACBC = {};
+
+  C.ACBC.Wiggling = true;
+  C.ACBC.WiggleTimer = 0;
+
+  setTimeout(ACBC.EndWiggling, ACBC.WiggleDuration, C);
+};
+
 
 /**
  * Draws the character with their position modified as necessary by wiggling
@@ -23,32 +48,63 @@ ACBC.Wiggling = false;
  * @param {(args: Array) => void} next - The next function in the hook chain
  * @returns {void} - Nothing
  */
-ACBC.WiggleCharacter = function(args, next)
+ACBC.DrawCharacterWithWiggle = function(args, next)
 {
   /** @type {Character} */
   let C = args[0];
-  /** @type {number} */
-  let X = args[1];
-  /** @type {number} */
-  let Y = args[2];
-  /** @type {number} */
-  let Zoom = args[3];
-  /** @type {boolean} */
-  let IsHeightResizeAllowed = args[4];
-  /** @type {CanvasRenderingContext2D} */
-  let DrawCanvas = args[5];
 
   if (C?.ACBC?.Wiggling)
   {
-    args[1] += 100;
+    C.ACBC.WiggleTimer += TimerRunInterval / 1000;
+
+    let t = ACBC.WiggleTimer / ACBC.WiggleDuration
+    args[1] += ACBC.WiggleX(t);
   }
 
   return next(args);
-}
+};
+
+
+/**
+ * Calculates the X offset of a wiggling character
+ * @param {number} t
+ *   The timer value, normalized by its period
+ * @returns {number}
+ *   The correct offset
+ */
+ACBC.WiggleX = function(t)
+{
+  let n = 6;  // number of wiggles to do
+  let leftL = t => 8 * t * t;
+  let leftM = t => 1 - leftL(t - 0.5);
+  let leftR = t => leftL(t - 1);
+  let left = t < 1/4 ? leftL(t) : (t < 3/4 ? leftM(t) : leftR(t));
+  let right = Math.sin(2 * Math.PI * n * t);
+  return left * right * ACBC.WiggleAmplitude;
+};
+
+
+/**
+ * Makes a character stop wiggling. Called automatically as a
+ * setTimeout callback from BeginWiggling.
+ * @param {Character} C
+ *   The character to stop wiggling
+ * @returns {void}
+ *   Nothing
+ */
+ACBC.EndWiggling = function(C)
+{
+  C = ACBC.Find(C);
+  if (!C) return;
+  if (!C.ACBC) C.ACBC = {};
+
+  C.ACBC.Wiggling = false;
+};
+
 
 ACBC.ModApi.hookFunction("DrawCharacter", 0, (args, next) =>
 {
-  return ACBC.WiggleCharacter(args, next);
+  return ACBC.DrawCharacterWithWiggle(args, next);
 });
 
 

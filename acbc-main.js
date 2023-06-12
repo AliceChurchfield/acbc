@@ -491,6 +491,8 @@ ACBC.Private.Initialize = function()
   ACBC.Private.KidnappingFavoritesSetup();
   ACBC.Private.ActionRoleSetup();
   ACBC.Private.FbcEmoteTriggerSetup();
+
+  Player.ACBC = ACBC;
 };
 
 
