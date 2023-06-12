@@ -18,7 +18,7 @@ if (!window.ACBC)
 
 ACBC.Wiggling = false;
 ACBC.WiggleTimer = 0;
-ACBC.WiggleDuration = 2;  // in s
+ACBC.WiggleDuration = 2500;  // in ms
 ACBC.WiggleAmplitude = 10;
 
 
@@ -55,7 +55,7 @@ ACBC.DrawCharacterWithWiggle = function(args, next)
 
   if (C?.ACBC?.Wiggling)
   {
-    C.ACBC.WiggleTimer += TimerRunInterval / 1000;
+    C.ACBC.WiggleTimer += TimerRunInterval;
 
     let t = ACBC.WiggleTimer / ACBC.WiggleDuration
     args[1] += ACBC.WiggleX(t);
