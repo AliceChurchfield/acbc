@@ -37,6 +37,12 @@ ACBC.WiggleCharacter = function(args, next)
   let IsHeightResizeAllowed = args[4];
   /** @type {CanvasRenderingContext2D} */
   let DrawCanvas = args[5];
+
+  if (C?.ACBC?.Wiggling)
+  {
+    args[1] += 100;
+  }
+
   return next(args);
 }
 
