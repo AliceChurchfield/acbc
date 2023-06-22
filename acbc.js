@@ -26,7 +26,7 @@ const MOD_API = bcModSdk.registerMod(
   repository: "https://github.com/AliceChurchfield/acbc.git",
 }, { allowReplace: true });
 
-if (!window.ACBC) window.ACBC = {};
+if (!window.ACBC) window.ACBC = { Private: {} };
 
 ACBC.ModApi = MOD_API;
 
@@ -59,6 +59,13 @@ AddAcbcScript("KidnapPatch.js");
 AddAcbcScript("KidnapLeaguePatch.js");
 AddAcbcScript("MagicPatch.js");
 AddAcbcScript("Wiggle.js");
+AddAcbcScript("Hop.js");
+AddAcbcScript("Time.js");
+AddAcbcScript("Math.js");
+AddAcbcScript("Color.js");
+AddAcbcScript("Curve.js");
+AddAcbcScript("Ease.js");
+AddAcbcScript("Transform.js");
 
 })();
 

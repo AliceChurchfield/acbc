@@ -13,11 +13,14 @@
 if (!window.ACBC)
 {
   console.warn("Running acbc-main.js outside of acbc.js");
+
   window.ACBC = {};
 }
 
+let Private = {};
+ACBC.Private = Private;
 
-ACBC.Private =
+Private =
 {
   BoopSneezeEnabled: true,
   BoopSneezeCooldownDuration: 5 * 60 * 1000, // in ms
@@ -267,7 +270,7 @@ ACBC.Kidnapping =
 
       GetRandomColor()
       {
-        return ACBC.Private.GetRandomFromArray(this.Colors);
+        return Private.GetRandomFromArray(this.Colors);
       }
     },
     GroupData: class
@@ -301,7 +304,7 @@ ACBC.Kidnapping =
 
       GetRandom()
       {
-        return ACBC.Private.GetRandomFromArray(this.DataSets);
+        return Private.GetRandomFromArray(this.DataSets);
       }
     },
     DataSet: class
@@ -314,12 +317,12 @@ ACBC.Kidnapping =
 
       GetRandomColor()
       {
-        return ACBC.Private.GetRandomFromArray(this.Colors);
+        return Private.GetRandomFromArray(this.Colors);
       }
 
       GetRandomType()
       {
-        return ACBC.Private.GetRandomFromArray(this.Types);
+        return Private.GetRandomFromArray(this.Types);
       }
     },
     Get: function(assetName)
@@ -348,7 +351,7 @@ ACBC.Kidnapping =
   },
 };
 
-ACBC.Private.MakeoverPrefs =
+Private.MakeoverPrefs =
 {
   HairFront:
   [
@@ -458,13 +461,13 @@ ACBC.Private.MakeoverPrefs =
   ],
 };
 
-if (ACBC.Private.PetSignIntervalId)
+if (Private.PetSignIntervalId)
 {
-  let id = ACBC.Private.PetSignIntervalId;
+  let id = Private.PetSignIntervalId;
   console.log(`Clearing old interval (ID ${id})`);
-  clearInterval(ACBC.Private.PetSignIntervalId);
+  clearInterval(Private.PetSignIntervalId);
 }
-ACBC.Private.PetSignIntervalId = 0;
+Private.PetSignIntervalId = 0;
 
 if (!Player.HornyVoidWhitelist)
 {
@@ -484,19 +487,19 @@ if (!Player.HornyVoidWhitelist)
 }
 
 
-ACBC.Private.Initialize = function()
+Private.Initialize = function()
 {
   console.log("Initializing ACBC....");
 
-  ACBC.Private.KidnappingFavoritesSetup();
-  ACBC.Private.ActionRoleSetup();
-  ACBC.Private.FbcEmoteTriggerSetup();
+  Private.KidnappingFavoritesSetup();
+  Private.ActionRoleSetup();
+  Private.FbcEmoteTriggerSetup();
 
   Player.ACBC = ACBC;
 };
 
 
-ACBC.Private.KidnappingFavoritesSetup = function()
+Private.KidnappingFavoritesSetup = function()
 {
   let ballGag = ACBC.Kidnapping.SetUpAsset("BallGag");
   ballGag.Group("ItemMouth").AddTypes("Tight");
@@ -554,7 +557,7 @@ ACBC.Private.KidnappingFavoritesSetup = function()
 };
 
 
-ACBC.Private.ActionRoleSetup = function()
+Private.ActionRoleSetup = function()
 {
   let topAsset = AssetGet(AssetFemale3DCG, "Cloth", "MistressTop");
   if (!topAsset.HideItemExclude.includes("BraSwimsuit2"))
@@ -634,7 +637,7 @@ ACBC.Find = function(C, random)
     if (C.length === 0) return null;
 
     if (random)
-      return ACBC.Private.GetRandomFromArray(matches);
+      return Private.GetRandomFromArray(matches);
 
     return C[0];
   }
@@ -646,7 +649,7 @@ ACBC.Find = function(C, random)
     if (C.length === 0) return null;
 
     if (random)
-      return ACBC.Private.GetRandomFromArray(matches);
+      return Private.GetRandomFromArray(matches);
     
     return matches[0];
   }
@@ -655,7 +658,7 @@ ACBC.Find = function(C, random)
 };
 
 
-ACBC.Private.GetRandomFromArray = function(array)
+Private.GetRandomFromArray = function(array)
 {
   let index = Math.floor(Math.random() * array.length);
   return array[index];
@@ -719,7 +722,7 @@ ACBC.Log = function(item, publish)
 };
 
 
-ACBC.Private.AddToHornyVoidWhitelist = function(C, publish)
+Private.AddToHornyVoidWhitelist = function(C, publish)
 {
   let c;
   let matches = ACBC.FindAll(C);
@@ -773,7 +776,7 @@ ACBC.Private.AddToHornyVoidWhitelist = function(C, publish)
 };
 
 
-ACBC.Private.RemoveFromHornyVoidWhitelist = function(C, publish)
+Private.RemoveFromHornyVoidWhitelist = function(C, publish)
 {
   let c;
   let matches = ACBC.FindAll(C);
@@ -827,7 +830,7 @@ ACBC.Private.RemoveFromHornyVoidWhitelist = function(C, publish)
 };
 
 
-ACBC.Private.IsOnHornyVoidWhitelist = function(C, publish)
+Private.IsOnHornyVoidWhitelist = function(C, publish)
 {
   let c;
   let matches = ACBC.FindAll(C);
@@ -875,7 +878,7 @@ ACBC.Private.IsOnHornyVoidWhitelist = function(C, publish)
 };
 
 
-ACBC.Private.IsItemAllowed = function(C, itemName, groupName, itemType, isVoid)
+Private.IsItemAllowed = function(C, itemName, groupName, itemType, isVoid)
 {
   if (C.ID === 0 || "IsNpc" in C && C.IsNpc()) return true;
   if (InventoryIsPermissionBlocked(C, itemName, groupName, itemType)) return false;
@@ -885,7 +888,7 @@ ACBC.Private.IsItemAllowed = function(C, itemName, groupName, itemType, isVoid)
   {
     // Currently, you cannot be a lover of the Void....
     if (C.ItemPermission > 3) return false;
-    return ACBC.Private.HasWhitelistedVoid(C);
+    return Private.HasWhitelistedVoid(C);
   }
 
   if (C.IsLoverOfPlayer() || C.IsOwnedByPlayer()) return true;
@@ -894,7 +897,7 @@ ACBC.Private.IsItemAllowed = function(C, itemName, groupName, itemType, isVoid)
 };
 
 
-ACBC.Private.HasWhitelistedVoid = function(C)
+Private.HasWhitelistedVoid = function(C)
 {
   // TODO: Make it so that players can add the Void to their whitelist
   return true;
@@ -903,9 +906,9 @@ ACBC.Private.HasWhitelistedVoid = function(C)
 
 // Attempts to put the specified item on the specified character.
 //   Returns whether it worked.
-ACBC.Private.ApplyItem = function(C, itemData, idNumber, overwrite)
+Private.ApplyItem = function(C, itemData, idNumber, overwrite)
 {
-  if (!ACBC.Private.IsItemAllowed(C, itemData.AssetName, itemData.AssetGroup,
+  if (!Private.IsItemAllowed(C, itemData.AssetName, itemData.AssetGroup,
     itemData.OptionName, idNumber < 0)) return false;
 
   if (!overwrite && InventoryGet(C, itemData.AssetGroup) != null) return false;
@@ -932,9 +935,9 @@ ACBC.Wear = function(C, itemSet, idNumber)
 
   if (Array.isArray(itemSet))
     for (const itemData of itemSet)
-      ACBC.Private.ApplyItem(C, itemData, idNumber);
+      Private.ApplyItem(C, itemData, idNumber);
   else
-    ACBC.Private.ApplyItem(C, itemSet, idNumber);
+    Private.ApplyItem(C, itemSet, idNumber);
 
   if (Array.isArray(itemSet))
     ChatRoomCharacterUpdate(C);
@@ -945,7 +948,7 @@ ACBC.Wear = function(C, itemSet, idNumber)
 };
 
 
-ACBC.Private.BindingHelper = function(C, name, difficulty, color)
+Private.BindingHelper = function(C, name, difficulty, color)
 {
 
 };
@@ -1071,7 +1074,7 @@ ACBC.OpenWardrobe = function(C)
 
   if (C.IsNpc())
   {
-    let settings = ACBC.Private.NpcWardrobeSettings;
+    let settings = Private.NpcWardrobeSettings;
 
     if (!C.OnlineSharedSettings)
       C.OnlineSharedSettings = {};
@@ -1531,7 +1534,7 @@ ACBC.Free = function(...Cs)
 
   for (const c of Cs)
   {
-    let name = ACBC.Private.FreeHelper(c);
+    let name = Private.FreeHelper(c);
     if (name)
       names.push(name);
   }
@@ -1566,7 +1569,7 @@ ACBC.Free = function(...Cs)
 };
 
 
-ACBC.Private.FreeHelper = function(C)
+Private.FreeHelper = function(C)
 {
   C = ACBC.Find(C);
 
@@ -1920,7 +1923,7 @@ ACBC.RandomRole = function(C, exclude, includeArmor = false, makeover = true)
   else if (Array.isArray(exclude))
     roleNames = roleNames.filter(n => !exclude.includes(n));
 
-  let roleName = ACBC.Private.GetRandomFromArray(roleNames);
+  let roleName = Private.GetRandomFromArray(roleNames);
   ACBC.ActionRole(roleName, C, includeArmor, makeover);
 }
 
@@ -1968,9 +1971,9 @@ ACBC.NpcHair = function(C, refresh = true)
   let front = "HairFront";
   let back = "HairBack";
   let frontName = front +
-    ACBC.Private.GetRandomFromArray(ACBC.Private.MakeoverPrefs.HairFront);
+    Private.GetRandomFromArray(Private.MakeoverPrefs.HairFront);
   let backName = back +
-    ACBC.Private.GetRandomFromArray(ACBC.Private.MakeoverPrefs.HairBack);
+    Private.GetRandomFromArray(Private.MakeoverPrefs.HairBack);
   let frontColor = CharacterAppearanceGetCurrentValue(C, front, "Color");
   let backColor = CharacterAppearanceGetCurrentValue(C, back, "Color");
 
@@ -2059,7 +2062,7 @@ ACBC.NpcEyes = function(C, refresh = true)
   }
 
   let assetName = "Eyes" +
-    ACBC.Private.GetRandomFromArray(ACBC.Private.MakeoverPrefs.Eyes);
+    Private.GetRandomFromArray(Private.MakeoverPrefs.Eyes);
   let aColor = CharacterAppearanceGetCurrentValue(C, "Eyes", "Color");
   let bColor = CharacterAppearanceGetCurrentValue(C, "Eyes2", "Color");
 
@@ -2219,10 +2222,10 @@ ACBC.WearRandomFave = function(C, groupName, difficulty,
         assetNames.push(fave.Name);
     });
   
-  let selectedName = ACBC.Private.GetRandomFromArray(assetNames);
+  let selectedName = Private.GetRandomFromArray(assetNames);
   let options = filteredFavorites.filter(
     fave => fave.Name === selectedName);
-  let selectedOption = ACBC.Private.GetRandomFromArray(options);
+  let selectedOption = Private.GetRandomFromArray(options);
   let crafts = C.Crafting.filter(
     craft =>
     {
@@ -2233,7 +2236,7 @@ ACBC.WearRandomFave = function(C, groupName, difficulty,
       return asset.AllowType.includes(craft.Type);
     });
   crafts.push(null);
-  let selectedCraft = ACBC.Private.GetRandomFromArray(crafts);
+  let selectedCraft = Private.GetRandomFromArray(crafts);
 
   let color = selectedCraft?.Color.split(",") ||
     ACBC.Kidnapping.Favorite(selectedName, groupName);
@@ -2279,19 +2282,77 @@ To do:
  */
 
 
-ACBC.Private.ChatRoomMessageHandler = function(data)
+Private.ChatRoomMessageHandler = function(data)
 {
-  ACBC.Private.CheckBoopSneeze(data);
-  ACBC.Private.CheckPetPostAdd(data);
-  ACBC.Private.CheckPetPostRemove(data);
-  ACBC.Private.CheckSpank(data);
-  ACBC.Private.CheckMagic(data);
-  ACBC.Private.CheckVoidOut(data);
-  ACBC.Private.CheckVoidIn(data);
-  ACBC.Private.CheckClearVoidList(data);
-  ACBC.Private.CheckAddRemoveList(data);
+  Private.CheckBoopSneeze(data);
+  Private.CheckPetPostAdd(data);
+  Private.CheckPetPostRemove(data);
+  Private.CheckSpank(data);
+  Private.CheckMagic(data);
+  Private.CheckVoidOut(data);
+  Private.CheckVoidIn(data);
+  Private.CheckClearVoidList(data);
+  Private.CheckAddRemoveList(data);
 };
-ACBC.Private.ChatRoomMessageHandler.ACBC = true;
+Private.ChatRoomMessageHandler.ACBC = true;
+
+
+/**
+ * Passes the given handler to BC's ChatRoomRegisterMessageHandler function.
+ * @param {AcbcChatRoomMessageHandler} handler
+ *   The handler to add
+ * @returns {void}
+ *   Nothing
+ */
+Private.AddAcbcChatRoomMessageHandler = function(handler)
+{
+  handler.ACBC = true;  // flag it so it can be removed the next time ACBC runs
+  ChatRoomRegisterMessageHandler(handler);
+};
+
+
+/**
+ * Removes all the old ACBC handlers and adds all the current ones
+ * @returns {void}
+ *   Nothing
+ */
+Private.ChatRoomMessageHandlerSetup = function()
+{
+  /** @type {AcbcChatRoomMessageHandler[]} */
+  let handlers = [];
+  handlers.push({
+    Description: "Makes the player sneeze from being booped",
+    Priority: 10, Callback: Private.CheckBoopSneeze });
+  handlers.push({Callback: Private.CheckPetPostAdd,
+    Description: "Sets up the pet post updater", Priority: 10});
+  handlers.push({Callback: Private.CheckPetPostRemove,
+    Description: "Removes the pet post updater", Priority: 10});
+  handlers.push({Callback: Private.CheckSpank,
+    Description: "Custom reactions to being spanked", Priority: 10});
+  handlers.push({Callback: Private.CheckMagic,
+    Description: "Parses the incoming message for magic", Priority: -10});
+  
+  console.log(`Adding ${handlers.length} ChatRoomMessage handlers`);
+  handlers.forEach(h => Private.AddAcbcChatRoomMessageHandler(h));
+  
+  Private.RemoveOldChatRoomMessageHandlers();
+};
+
+
+/**
+ * Removes all the old ACBC handlers from BC's main list.
+ * @returns {void}
+ *   Nothing
+ */
+Private.RemoveOldChatRoomMessageHandlers = function()
+{
+  let newHandlerArray = ChatRoomMessageHandlers.filter(h => !h.ACBC);
+  let removeCount = ChatRoomMessageHandlers.length - newHandlerArray.length;
+  console.log(`Removing ${removeCount} ChatRoomMessage handlers`);
+
+  ChatRoomMessageHandlers = newHandlerArray;
+};
+
 
 {
   let listeners = ServerSocket.listeners("ChatRoomMessage")
@@ -2301,14 +2362,14 @@ ACBC.Private.ChatRoomMessageHandler.ACBC = true;
     ServerSocket.off("ChatRoomMessage", l);
 }
 
-ServerSocket.on("ChatRoomMessage", ACBC.Private.ChatRoomMessageHandler);
+ServerSocket.on("ChatRoomMessage", Private.ChatRoomMessageHandler);
 
 
-ACBC.Private.AccountBeepHandler = function(data)
+Private.AccountBeepHandler = function(data)
 {
-  ACBC.Private.CheckVoidBeep(data);
+  Private.CheckVoidBeep(data);
 };
-ACBC.Private.AccountBeepHandler.ACBC = true;
+Private.AccountBeepHandler.ACBC = true;
 
 {
   let listeners = ServerSocket.listeners("AccountBeep")
@@ -2318,10 +2379,10 @@ ACBC.Private.AccountBeepHandler.ACBC = true;
     ServerSocket.off("AccountBeep", l);
 }
 
-ServerSocket.on("AccountBeep", ACBC.Private.AccountBeepHandler);
+ServerSocket.on("AccountBeep", Private.AccountBeepHandler);
 
 
-ACBC.Private.CheckBoopSneeze = function(data)
+Private.CheckBoopSneeze = function(data)
 {
   if (data.Type !== "Activity") return;
 
@@ -2338,7 +2399,7 @@ ACBC.Private.CheckBoopSneeze = function(data)
 };
 
 
-ACBC.Private.CheckPetPostAdd = function(data)
+Private.CheckPetPostAdd = function(data)
 {
   if (data.Content !== "ActionUse" || data.Type !== "Action") return;
 
@@ -2352,7 +2413,7 @@ ACBC.Private.CheckPetPostAdd = function(data)
 }
 
 
-ACBC.Private.CheckPetPostRemove = function(data)
+Private.CheckPetPostRemove = function(data)
 {
   if (data.Content !== "ActionRemove" || data.Type !== "Action") return;
 
@@ -2366,7 +2427,7 @@ ACBC.Private.CheckPetPostRemove = function(data)
 }
 
 
-ACBC.Private.CheckSpank = function(data)
+Private.CheckSpank = function(data)
 {
   if (data.Type !== "Activity") return;
 
@@ -2385,7 +2446,7 @@ ACBC.Private.CheckSpank = function(data)
 }
 
 
-ACBC.Private.CheckMagic = function(data)
+Private.CheckMagic = function(data)
 {
   if (data.Type !== "Chat") return;
   if (data.Sender !== Player.MemberNumber) return;
@@ -2395,11 +2456,11 @@ ACBC.Private.CheckMagic = function(data)
 
   let t = data.Content;
 
-  if (!t.startsWith(ACBC.Private.RopeSpellStart)) return;
-  if (!t.endsWith(ACBC.Private.RopeSpellEnd)) return;
+  if (!t.startsWith(Private.RopeSpellStart)) return;
+  if (!t.endsWith(Private.RopeSpellEnd)) return;
 
-  let start = new RegExp(ACBC.Private.RopeSpellStart, "i");
-  let end = new RegExp(ACBC.Private.RopeSpellEnd, "i");
+  let start = new RegExp(Private.RopeSpellStart, "i");
+  let end = new RegExp(Private.RopeSpellEnd, "i");
   let middle = t.replace(start, "").replace(end, "").trim();
 
   let id = parseInt(middle, 10);
@@ -2426,37 +2487,37 @@ ACBC.Private.CheckMagic = function(data)
 }
 
 
-ACBC.Private.CheckVoidOut = function(data)
+Private.CheckVoidOut = function(data)
 {
   if (data.Type !== "Action") return;
   if (data.Content !== "ServerDisconnect") return;
 
-  let tag = ACBC.Private.HornyVoidRoomTag;
+  let tag = Private.HornyVoidRoomTag;
   let nameIncludesTag = ChatRoomData.Name.toLowerCase().includes(tag);
   let descriptionIncludesTag = ChatRoomData.Description.toLowerCase().includes(tag);
   if (!nameIncludesTag && !descriptionIncludesTag) return;
   
   let id = data.Dictionary.find(e => e.Tag === "SourceCharacter").MemberNumber;
   if (Player.HornyVoidWhitelist.has(id))
-    ACBC.Private.VoidVictims.set(id, true);
+    Private.VoidVictims.set(id, true);
 }
 
 
-ACBC.Private.CheckVoidIn = function(data)
+Private.CheckVoidIn = function(data)
 {
-  if (!ACBC.Private.HornyVoidEnabled) return;
+  if (!Private.HornyVoidEnabled) return;
   if (data.Type !== "Action") return;
   if (data.Content !== "ServerEnter") return;
   
-  let tag = ACBC.Private.HornyVoidRoomTag;
+  let tag = Private.HornyVoidRoomTag;
   let nameIncludesTag = ChatRoomData.Name.toLowerCase().includes(tag);
   let descriptionIncludesTag = ChatRoomData.Description.toLowerCase().includes(tag);
   if (!nameIncludesTag && !descriptionIncludesTag) return;
 
   let id = data.Dictionary.find(e => e.Tag === "SourceCharacter").MemberNumber;
-  if (!ACBC.Private.VoidVictims.get(id)) return;
+  if (!Private.VoidVictims.get(id)) return;
   
-  ACBC.Private.VoidVictims.delete(id);
+  Private.VoidVictims.delete(id);
   let victim = ACBC.FindAll(id);
   console.log(victim);
   let set = Math.random() > 0.5 ?
@@ -2465,7 +2526,7 @@ ACBC.Private.CheckVoidIn = function(data)
 }
 
 
-ACBC.Private.CheckClearVoidList = function(data)
+Private.CheckClearVoidList = function(data)
 {
   if (data.Type !== "Action") return;
   if (data.Content !== "ServerEnter") return;
@@ -2473,11 +2534,11 @@ ACBC.Private.CheckClearVoidList = function(data)
   let id = data.Dictionary.find(e => e.Tag === "SourceCharacter").MemberNumber;
   if (id !== Player.MemberNumber) return;
 
-  ACBC.Private.VoidVictims = new Map();
+  Private.VoidVictims = new Map();
 }
 
 
-ACBC.Private.CheckAddRemoveList = function(data)
+Private.CheckAddRemoveList = function(data)
 {
   if (data.Type !== "Chat") return;
   if (data.Sender !== Player.MemberNumber) return;
@@ -2490,7 +2551,7 @@ ACBC.Private.CheckAddRemoveList = function(data)
     if (!identifier)
       identifier = rest;
     
-    ACBC.Private.AddToHornyVoidWhitelist(identifier, true);
+    Private.AddToHornyVoidWhitelist(identifier, true);
   }
   else if (data.Content.startsWith("!hvremove"))
   {
@@ -2500,12 +2561,12 @@ ACBC.Private.CheckAddRemoveList = function(data)
     if (!identifier)
       identifier = rest;
 
-    ACBC.Private.RemoveFromHornyVoidWhitelist(identifier, true);
+    Private.RemoveFromHornyVoidWhitelist(identifier, true);
   }
 }
 
 
-ACBC.Private.CheckVoidBeep = function(data)
+Private.CheckVoidBeep = function(data)
 {
   
 }
@@ -2513,9 +2574,9 @@ ACBC.Private.CheckVoidBeep = function(data)
 
 ACBC.AttemptBoopSneeze = function()
 {
-  if (!ACBC.Private.BoopSneezeEnabled) return;
+  if (!Private.BoopSneezeEnabled) return;
 
-  if (ACBC.Private.BoopSneezing)
+  if (Private.BoopSneezing)
   {
     // TODO: add feedback here
     return;
@@ -2523,11 +2584,11 @@ ACBC.AttemptBoopSneeze = function()
   
   if (!ACBC.BoopSneezeReady())
   {
-    if (ACBC.Private.PublishBoopSneezeCooldown)
+    if (Private.PublishBoopSneezeCooldown)
     {
       let cooldown = ACBC.GetCooldownString();
       
-      if (ACBC.Private.Language === "Spanish")
+      if (Private.Language === "Spanish")
       {
         ACBC.SendEmote(`*Aún debe esperar ${cooldown} ` +
           `antes de que vuelva a funcionar.`);
@@ -2548,20 +2609,20 @@ ACBC.AttemptBoopSneeze = function()
 
 ACBC.BoopSneezeReady = function()
 {
-  if (ACBC.Private.IgnoreBoopSneezeCooldown) return true;
+  if (Private.IgnoreBoopSneezeCooldown) return true;
 
   let now = Date.now();
-  let last = ACBC.Private.BoopSneezeLast;
+  let last = Private.BoopSneezeLast;
 
-  return last === null || now - last >= ACBC.Private.BoopSneezeCooldownDuration;
+  return last === null || now - last >= Private.BoopSneezeCooldownDuration;
 };
 
 
 ACBC.GetBoopSneezeRemainingCooldown = function()
 {
-  let cooldownProgress = Date.now() - ACBC.Private.BoopSneezeLast;
+  let cooldownProgress = Date.now() - Private.BoopSneezeLast;
   let remainingCooldown =
-    ACBC.Private.BoopSneezeCooldownDuration - cooldownProgress;
+    Private.BoopSneezeCooldownDuration - cooldownProgress;
   
   return Math.max(Math.floor(remainingCooldown / 1000), 0);
 }
@@ -2581,14 +2642,14 @@ ACBC.GetCooldownString = function()
 
 ACBC.BoopSneeze = async function()
 {
-  ACBC.Private.BoopSneezing = true;
+  Private.BoopSneezing = true;
 
   let windup1 = ACBC.SneezeWindupString(3, 4, 1, 2, 3, 4);
   let windup2 = ACBC.SneezeWindupString(5, 7, 2, 4, 5, 7);
   let windup3 = ACBC.SneezeWindupString(8, 10, 4, 6, 7, 9);
   let release = ACBC.SneezeReleaseString(3, 6, 12, 20, 5, 8);
 
-  let beginMessage = ACBC.Private.Language === "Spanish" ?
+  let beginMessage = Private.Language === "Spanish" ?
     "comienza a estornudar." : "begins to sneeze.";
 
   ACBC.SendEmote(beginMessage);
@@ -2601,8 +2662,8 @@ ACBC.BoopSneeze = async function()
   await ACBC.Sleep(1500);
   ACBC.SendChat(release);
   ActivityOrgasmStart(Player);
-  ACBC.Private.BoopSneezeLast = Date.now();
-  ACBC.Private.BoopSneezing = false;
+  Private.BoopSneezeLast = Date.now();
+  Private.BoopSneezing = false;
 };
 
 
@@ -2685,7 +2746,7 @@ ACBC.SneezeReleaseString = function(hMin, hMax, oMin, oMax, tMin, tMax)
 
   for (let i = 0; i < oCount; ++i)
   {
-    let letter = ACBC.Private.Language === "Spanish" ? "ú" : "o";
+    let letter = Private.Language === "Spanish" ? "ú" : "o";
 
     if (Math.random() < upperChance)
       letter = letter.toUpperCase();
@@ -2706,7 +2767,7 @@ ACBC.PetPostSetup = async function()
 {
   await ACBC.Sleep(200);
 
-  if (ACBC.Private.PetSignIntervalId)
+  if (Private.PetSignIntervalId)
   {
     console.warn("Trying to run PetPostSetup, but the setInterval id " +
     "is already present.");
@@ -2715,14 +2776,14 @@ ACBC.PetPostSetup = async function()
 
   console.log("Adding pet post updater");
   
-  ACBC.Private.PetSignIntervalId =
+  Private.PetSignIntervalId =
     setInterval(ACBC.PetPostUpdate, 1000);
 }
 
 
 ACBC.PetPostRemoval = function()
 {
-  if (!ACBC.Private.PetSignIntervalId)
+  if (!Private.PetSignIntervalId)
   {
     console.warn("Trying to run PetPostRemoval, but the setInterval id " +
     "is not present.");
@@ -2731,8 +2792,8 @@ ACBC.PetPostRemoval = function()
   
   console.log("Removing pet post updater");
 
-  clearInterval(ACBC.Private.PetSignIntervalId);
-  ACBC.Private.PetSignIntervalId = 0;
+  clearInterval(Private.PetSignIntervalId);
+  Private.PetSignIntervalId = 0;
 }
 
 
@@ -2742,7 +2803,7 @@ ACBC.PetPostUpdate = function()
   if (!post)
   {
     console.log("There's no post! Interval id " +
-      ACBC.Private.PetSignIntervalId);
+      Private.PetSignIntervalId);
     ACBC.PetPostRemoval();
     return;
   }
@@ -2755,7 +2816,7 @@ ACBC.PetPostUpdate = function()
   
   let s = ACBC.GetBoopSneezeRemainingCooldown();
 
-  if (s === ACBC.Private.CachedCooldown) return;
+  if (s === Private.CachedCooldown) return;
 
   let cooldown = ACBC.GetCooldownString();
   
@@ -2766,14 +2827,14 @@ ACBC.PetPostUpdate = function()
   if (s > 0)
   {
     properties.Text3 = `in ${cooldown}`;
-    colors[ACBC.Private.SignColorIndex] = ACBC.Private.SignWaitingColor;
-    colors[ACBC.Private.TextColorIndex] = ACBC.Private.TextWaitingColor;
+    colors[Private.SignColorIndex] = Private.SignWaitingColor;
+    colors[Private.TextColorIndex] = Private.TextWaitingColor;
   }
   else
   {
     properties.Text3 = "";
-    colors[ACBC.Private.SignColorIndex] = ACBC.Private.SignReadyColor;
-    colors[ACBC.Private.TextColorIndex] = ACBC.Private.TextReadyColor;
+    colors[Private.SignColorIndex] = Private.SignReadyColor;
+    colors[Private.TextColorIndex] = Private.TextReadyColor;
   }
   
   post.Property = properties;
@@ -2782,7 +2843,7 @@ ACBC.PetPostUpdate = function()
   CharacterRefresh(Player, true, true);
   ChatRoomCharacterItemUpdate(Player, "ItemNeckRestraints");
 
-  ACBC.Private.CachedCooldown = s;
+  Private.CachedCooldown = s;
 }
 
 
@@ -2791,8 +2852,8 @@ ACBC.SpankReact = async function()
   await ACBC.Sleep(100);
 
   let index = Math.floor(1 / Math.random()) %
-    ACBC.Private.SpankReactionStrings.length;
-  let str = ACBC.Private.SpankReactionStrings[index];
+    Private.SpankReactionStrings.length;
+  let str = Private.SpankReactionStrings[index];
   ACBC.SendChat(str);
 }
 
@@ -2812,7 +2873,7 @@ ACBC.SendEmote = function(msg)
 ////////////////////////// FBC EVENTS AND TRIGGERS //////////////////////////
 
 
-ACBC.Private.RemoveCuddleTrigger = function()
+Private.RemoveCuddleTrigger = function()
 {
   let index = bce_ActivityTriggers.findIndex(t => t.Event === "Cuddle");
 
@@ -2822,7 +2883,7 @@ ACBC.Private.RemoveCuddleTrigger = function()
 }
 
 
-ACBC.Private.RemoveStretchTrigger = function()
+Private.RemoveStretchTrigger = function()
 {
   let index = bce_ActivityTriggers.findIndex(t => t.Event === "Stretch");
 
@@ -2832,7 +2893,7 @@ ACBC.Private.RemoveStretchTrigger = function()
 }
 
 
-ACBC.Private.AddActivityTrigger = function(trigger)
+Private.AddActivityTrigger = function(trigger)
 {
   let index = bce_ActivityTriggers.findIndex(t => t.Event === trigger.Event);
   
@@ -2843,7 +2904,7 @@ ACBC.Private.AddActivityTrigger = function(trigger)
 }
 
 
-ACBC.Private.AddAllTriggers = function()
+Private.AddAllTriggers = function()
 {
   console.log("Adding event expression triggers...");
 
@@ -3055,21 +3116,21 @@ ACBC.Private.AddAllTriggers = function()
     "Devious", "Laughing", "Grin", "Smirk", "Pout"]
   */
 
-  ACBC.Private.AddActivityTrigger(holdBreathTrigger);
-  ACBC.Private.AddActivityTrigger(boopSneezeTrigger);
-  ACBC.Private.AddActivityTrigger(rollEyesTrigger);
+  Private.AddActivityTrigger(holdBreathTrigger);
+  Private.AddActivityTrigger(boopSneezeTrigger);
+  Private.AddActivityTrigger(rollEyesTrigger);
 }
 
 
-ACBC.Private.FbcEmoteTriggerSetup = async function()
+Private.FbcEmoteTriggerSetup = async function()
 {
   console.log("Waiting for bce_EventExpressions to be loaded...");
   await ACBC.WaitFor(
     () => !!window.Player?.Name && !!window.bce_EventExpressions);
 
-  ACBC.Private.AddAllTriggers();
-  ACBC.Private.RemoveCuddleTrigger();
-  ACBC.Private.RemoveStretchTrigger();
+  Private.AddAllTriggers();
+  Private.RemoveCuddleTrigger();
+  Private.RemoveStretchTrigger();
 }
 
 
@@ -3205,6 +3266,6 @@ ACBC.HornyVoidSets.Tentacles =
 
 
 //////////////////////////
-ACBC.Private.Initialize();
+Private.Initialize();
 
 console.log(" * acbc-main.js loaded.");

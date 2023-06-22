@@ -20,6 +20,8 @@ ACBC.Wiggling = false;
 ACBC.WiggleTimer = 0;
 ACBC.WiggleDuration = 2500;  // in ms
 ACBC.WiggleAmplitude = 10;
+ACBC.WiggleCount = 6;
+ACBC.WiggleFrequency = 3; // in Hz
 
 
 /**
@@ -53,16 +55,23 @@ ACBC.DrawCharacterWithWiggle = function(args, next)
   /** @type {Character} */
   let C = args[0];
 
-  if (C?.ACBC?.Wiggling)
+  if (C?.ACBC)
   {
-    C.ACBC.WiggleTimer += TimerRunInterval;
+    if (C.ACBC.XOverride !== undefined)
+      args[1] += C.ACBC.XOverride;
 
-    let t = ACBC.WiggleTimer / ACBC.WiggleDuration
-    args[1] += ACBC.WiggleX(t);
+    if (C.ACBC.Wiggling)
+    {
+      C.ACBC.WiggleTimer += TimerRunInterval;
+
+      let t = ACBC.WiggleTimer / ACBC.WiggleDuration
+      args[1] += ACBC.WiggleX(t);
+    }
   }
 
   return next(args);
 };
+Player.ACBC.XOverride = 0;
 
 
 /**
@@ -74,13 +83,11 @@ ACBC.DrawCharacterWithWiggle = function(args, next)
  */
 ACBC.WiggleX = function(t)
 {
-  let n = 6;  // number of wiggles to do
-  let leftL = t => 8 * t * t;
-  let leftM = t => 1 - leftL(t - 0.5);
-  let leftR = t => leftL(t - 1);
-  let left = t < 1/4 ? leftL(t) : (t < 3/4 ? leftM(t) : leftR(t));
-  let right = Math.sin(2 * Math.PI * n * t);
-  return left * right * ACBC.WiggleAmplitude;
+  let n = ACBC.WiggleCount;  // number of wiggles to do
+  let i = 2 * t - 1;
+  let envelope = 1 - i * i * i;
+  let wave = Math.sin(2 * Math.PI * n * t);
+  return envelope * wave * ACBC.WiggleAmplitude;
 };
 
 
@@ -102,10 +109,7 @@ ACBC.EndWiggling = function(C)
 };
 
 
-ACBC.ModApi.hookFunction("DrawCharacter", 0, (args, next) =>
-{
-  return ACBC.DrawCharacterWithWiggle(args, next);
-});
+ACBC.ModApi.hookFunction("DrawCharacter", 0, ACBC.DrawCharacterWithWiggle);
 
 
 console.log(" * Wiggle.js loaded.");

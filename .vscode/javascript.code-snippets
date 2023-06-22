@@ -15,24 +15,8 @@
 			"",
 			"",
 			"",
-			"$3",
+			"$0",
 			"",
-		],
-	},
-	"Function header":
-	{
-		"description": "Standard JSDoc function header",
-		"prefix": "functionheader",
-		"body":
-		[
-			"/**",
-			" * ${1:Function description}",
-			" * @param {${4:ParamType}} ${5:paramName}",
-			" *   ${6:Parameter description}",
-			" * @returns ${2:ReturnType}",
-			" *   ${3:Return value description}",
-			" */",
-			"$7",
 		],
 	},
 	"New ACBC file":
@@ -58,7 +42,7 @@
 			"}",
 			"",
 			"",
-			"$3",
+			"$0",
 			"",
 			"console.log(\" * $TM_FILENAME loaded.\");",
 			"",
