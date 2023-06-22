@@ -45,7 +45,7 @@ function AddAcbcScript(src)
 }
 
 AddAcbcScript("acbc-main.js");
-//AddAcbcScript("acbc-util.js");
+AddAcbcScript("acbc-util.js");
 AddAcbcScript("WearItem.js");
 AddAcbcScript("WhatSheLikes.js");
 AddAcbcScript("KidnapFix.js");
