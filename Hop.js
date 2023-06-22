@@ -35,7 +35,7 @@ ACBC.DrawCharacterWithHop = function(args, next)
 }
 
 
-ACBC.ModApi.hookFunction("DrawCharacter", 0, ACBC.DrawCharacterWithHop);
+ACBC.HookFunction("DrawCharacter", 0, ACBC.DrawCharacterWithHop);
 
 
 console.log(" * Hop.js loaded.");

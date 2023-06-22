@@ -15,6 +15,12 @@ if (!window.ACBC)
 }
 
 
+ACBC.HookFunction = function(functionName, priority, hook)
+{
+  if (hook.Unhook)
+    hook.Unhook();
+  hook.Unhook = ACBC.ModApi.hookFunction(functionName, priority, hook);
+};
 
 
 console.log(" * acbc-util.js loaded.");

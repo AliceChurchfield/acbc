@@ -74,8 +74,8 @@ ACBC.DrawImageExTx = function(args, next)
 };
 
 
-ACBC.ModApi.hookFunction("DrawImageEx", 0, ACBC.DrawImageExTx);
-ACBC.ModApi.hookFunction("DrawCharacter", 0, ACBC.DrawCharacterTx);
+ACBC.HookFunction("DrawImageEx", 0, ACBC.DrawImageExTx);
+ACBC.HookFunction("DrawCharacter", 0, ACBC.DrawCharacterTx);
 
 
 console.log(" * Transform.js loaded.");
