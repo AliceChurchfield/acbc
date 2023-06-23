@@ -28,6 +28,7 @@ ACBC.Classes.Tx = class
 
 
 if (ACBC.Tx === undefined) ACBC.Tx = new ACBC.Classes.Tx();
+ACBC.ActiveTx = null;
 
 
 ACBC.DrawCharacterTx = function(args, next)
@@ -35,14 +36,11 @@ ACBC.DrawCharacterTx = function(args, next)
   /** @type {Character} */
   let C = args[0];
 
-  if (C?.ACBC)
-  {
-    let canvas = args[5];
-    if (canvas)
-      canvas.ACBC = C.ACBC;
-  }
+  ACBC.ActiveTx = C?.ACBC?.Tx;
+  let returnVal = next(args);
+  ACBC.ActiveTx = null;
 
-  return next(args);
+  return returnVal;
 };
 
 
@@ -54,9 +52,9 @@ ACBC.DrawCharacterTx = function(args, next)
  */
 ACBC.DrawImageExTx = function(args, next)
 {
-  let opts = args[3];
+  let opts = args[3] || {};
   /** @type {ACBC.Classes.Tx} */
-  let activeTx = opts?.Canvas?.ACBC?.Tx;
+  let activeTx = ACBC.ActiveTx;
 
   if (activeTx)
   {
@@ -74,8 +72,8 @@ ACBC.DrawImageExTx = function(args, next)
 };
 
 
-ACBC.HookFunction("DrawImageEx", 0, ACBC.DrawImageExTx);
-ACBC.HookFunction("DrawCharacter", 0, ACBC.DrawCharacterTx);
+ACBC.HookFunction("DrawImageEx", -100, ACBC.DrawImageExTx);
+ACBC.HookFunction("DrawCharacter", -100, ACBC.DrawCharacterTx);
 
 
 console.log(" * Transform.js loaded.");
