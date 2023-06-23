@@ -20,10 +20,18 @@ if (ACBC.Classes === undefined) ACBC.Classes = {};
 
 ACBC.Classes.Tx = class
 {
+  OriginX = 0.5;  // How far across the character is the pivot point
+  OriginY = 0.98; // How far down the character is the pivot point
   PosX = 0;   // Relative to wherever vanilla BC would otherwise put you
   PosY = 0;   // Relative to wherever vanilla BC would otherwise put you
   ScaleX = 1; // Relative to whatever scale you'd otherwise have
   ScaleY = 1; // Relative to whatever scale you'd otherwise have
+
+  IsActive()
+  {
+    return this.PosX !== 0 || this.PosY !== 0 ||
+           this.ScaleX !== 1 || this.ScaleY !== 1;
+  }
 };
 
 
@@ -67,8 +75,8 @@ ACBC.DrawImageExTx = function(args, next)
     opts.Height *= activeTx.ScaleY;
     let dW = opts.Width - originalWidth;
     let dH = opts.Height - originalHeight;
-    args[1] += activeTx.PosX - dW / 2;
-    args[2] += activeTx.PosY - dH;
+    args[1] += activeTx.PosX - dW * activeTx.OriginX;
+    args[2] += activeTx.PosY - dH * activeTx.OriginY;
     args[3] = opts;
   }
 
