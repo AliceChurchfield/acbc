@@ -61,10 +61,14 @@ ACBC.DrawImageExTx = function(args, next)
     opts.Width = opts.Width || opts.SourcePos?.[2] || args[0].width;
     opts.Height = opts.Height || opts.SourcePos?.[3] || args[0].height;
 
-    args[1] += activeTx.PosX;
-    args[2] += activeTx.PosY;
+    let originalWidth = opts.Width;
+    let originalHeight = opts.Height;
     opts.Width *= activeTx.ScaleX;
     opts.Height *= activeTx.ScaleY;
+    let dW = opts.Width - originalWidth;
+    let dH = opts.Height - originalHeight;
+    args[1] += activeTx.PosX - dW / 2;
+    args[2] += activeTx.PosY - dH;
     args[3] = opts;
   }
 
