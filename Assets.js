@@ -29,60 +29,6 @@ let Pole =
 ACBC.Assets.ItemDevices.Pole = Pole;
 
 
-let ResetPair = class
-{
-  /** @type {string} */
-  Key;
-  /** @type {*} */
-  ResetValue;
-
-  /**
-   * @param {string} key 
-   * @param {*} resetValue 
-   */
-  constructor(key, resetValue)
-  {
-    this.Key = key;
-    this.ResetValue = resetValue;
-  }
-};
-
-
-let ResetData = class
-{
-  /** @type {object} */
-  TargetObject;
-  /** @type {ResetPair[]} */
-  Pairs = [];
-
-  /**
-   * @param {object} resetTargetObject 
-   */
-  constructor(resetTargetObject)
-  {
-    this.TargetObject = resetTargetObject;
-  }
-
-  /**
-   * @param {string} key 
-   * @returns {void}
-   */
-  Add(key) { this.Pairs.push(new ResetPair(key, this.TargetObject[key])); }
-
-  /**
-   * @param {ResetPair} pair 
-   * @returns {void}
-   */
-  ApplyPair(pair) { this.TargetObject[pair.Key] = pair.ResetValue; }
-
-  Reset()
-  {
-    for (const pair of this.Pairs)
-      this.ApplyPair(pair);
-  }
-};
-
-
 if (ACBC.Classes === undefined) ACBC.Classes = {};
 ACBC.Classes.DataResetter = class
 {
