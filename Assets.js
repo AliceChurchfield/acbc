@@ -22,6 +22,11 @@ let WoodenBox =
   Fixed: true,
 };
 ACBC.Assets.ItemDevices.WoodenBox = WoodenBox;
+let Pole =
+{
+  Fixed: true,
+};
+ACBC.Assets.ItemDevices.Pole = Pole;
 
 
 let ResetPair = class
@@ -46,7 +51,7 @@ let ResetPair = class
 let ResetData = class
 {
   /** @type {object} */
-  ResetTargetObject;
+  TargetObject;
   /** @type {ResetPair[]} */
   Pairs = [];
 
@@ -55,24 +60,20 @@ let ResetData = class
    */
   constructor(resetTargetObject)
   {
-    this.ResetTargetObject = resetTargetObject;
+    this.TargetObject = resetTargetObject;
   }
 
   /**
    * @param {string} key 
-   * @param {*} resetValue 
    * @returns {void}
    */
-  Add(key, resetValue)
-  {
-    this.Pairs.push(new ResetPair(key, resetValue));
-  }
+  Add(key) { this.Pairs.push(new ResetPair(key, this.TargetObject[key])); }
 
   /**
    * @param {ResetPair} pair 
    * @returns {void}
    */
-  ApplyPair(pair) { this.ResetTargetObject[pair.Key] = pair.ResetValue; }
+  ApplyPair(pair) { this.TargetObject[pair.Key] = pair.ResetValue; }
 
   Reset()
   {
@@ -82,15 +83,96 @@ let ResetData = class
 };
 
 
+if (ACBC.Classes === undefined) ACBC.Classes = {};
+ACBC.Classes.DataResetter = class
+{
+  ResetPair = class
+  {
+    /** @type {string} */
+    Key;
+    /** @type {*} */
+    ResetValue;
+
+    /**
+     * @param {string} key 
+     * @param {*} resetValue 
+     */
+    constructor(key, resetValue)
+    {
+      this.Key = key;
+      this.ResetValue = resetValue;
+    }
+  };
+
+  ResetData = class
+  {
+    /** @type {object} */
+    TargetObject;
+    /** @type {ACBC.Classes.DataResetter.ResetPair[]} */
+    Pairs = [];
+
+    /**
+     * @param {object} targetObject 
+     */
+    constructor(targetObject)
+    {
+      this.TargetObject = targetObject;
+    }
+
+    /**
+     * @param {string} key 
+     * @returns {void}
+     */
+    Add(key)
+    {
+      this.Pairs.push(
+        new ACBC.Classes.DataResetter.ResetPair(
+          key, this.TargetObject[key]));
+    }
+
+    /**
+     * @param {ACBC.Classes.DataResetter.ResetPair} pair 
+     * @returns {void}
+     */
+    ApplyPair(pair) { this.TargetObject[pair.Key] = pair.ResetValue; }
+
+    Reset()
+    {
+      for (const pair of this.Pairs)
+        this.ApplyPair(pair);
+    }
+  };
+
+  /** @type {ACBC.Classes.DataResetter.ResetData[]} */
+  Data = [];
+
+  /**
+   * @param {object} targetObject 
+   * @returns {ACBC.Classes.DataResetter.ResetData}
+   */
+  Add(targetObject)
+  {
+    let resetData = new this.ResetData(targetObject);
+    this.Data.push(resetData);
+    return resetData;
+  }
+
+  Reset()
+  {
+    for (const data of this.Data)
+      data.Reset();
+  }
+};
+
+
 ACBC.DrawCharacterAssetMods = function(args, next)
 {
-  /** @type {ResetData[]} */
-  let resetData = [];
+  let resetter = new ACBC.Classes.DataResetter();
   /** @type {Character} */
   let C = args[0];
   if (C?.ACBC && C.ACBC.Tx.IsActive())
   {
-    for (const item of C.Appearance)
+    for (const item of C.Appearance.filter(i => i.Asset.Group.Name === "ItemDevices"))
     {
       let asset = item.Asset;
       let groupName = asset.Group.Name;
@@ -103,7 +185,7 @@ ACBC.DrawCharacterAssetMods = function(args, next)
 
       if (assetData.Fixed)
       {
-        let data = new ResetData(asset);
+        let data = resetter.Add(asset);
         data.Add("DrawingLeft", asset.DrawingLeft);
         data.Add("DrawingTop", asset.DrawingTop);
         asset.DrawingLeft = -C.ACBC.Tx.PosX;
@@ -114,8 +196,7 @@ ACBC.DrawCharacterAssetMods = function(args, next)
 
   let returnVal = next(args);
 
-  for (const data of resetData)
-    data.Reset();
+  resetter.Reset();
 
   return returnVal;
 };
