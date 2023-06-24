@@ -32,7 +32,7 @@ ACBC.Assets.ItemDevices.Pole = Pole;
 if (ACBC.Classes === undefined) ACBC.Classes = {};
 ACBC.Classes.DataResetter = class
 {
-  ResetPair = class
+  static ResetPair = class
   {
     /** @type {string} */
     Key;
@@ -50,7 +50,7 @@ ACBC.Classes.DataResetter = class
     }
   };
 
-  ResetData = class
+  static ResetData = class
   {
     /** @type {object} */
     TargetObject;
@@ -98,7 +98,7 @@ ACBC.Classes.DataResetter = class
    */
   Add(targetObject)
   {
-    let resetData = new this.ResetData(targetObject);
+    let resetData = new ACBC.Classes.DataResetter.ResetData(targetObject);
     this.Data.push(resetData);
     return resetData;
   }
