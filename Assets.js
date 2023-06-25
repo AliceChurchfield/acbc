@@ -134,8 +134,10 @@ ACBC.DrawCharacterAssetMods = function(args, next)
         let data = resetter.Add(asset);
         data.Add("DrawingLeft", asset.DrawingLeft);
         data.Add("DrawingTop", asset.DrawingTop);
-        asset.DrawingLeft = -C.ACBC.Tx.PosX;
-        asset.DrawingTop = -C.ACBC.Tx.PosY;
+        let left = asset.DrawingLeft ?? asset.Group.DrawingLeft;
+        let top = asset.DrawingTop ?? asset.Group.DrawingTop;
+        asset.DrawingLeft = left - C.ACBC.Tx.PosX;
+        asset.DrawingTop = top - C.ACBC.Tx.PosY;
       }
     }
   }
