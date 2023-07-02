@@ -80,7 +80,7 @@ ACBC.DrawCharacterAssetMods = function(args, next)
     }
   }
 
-  if (resetData.keys().length > 0)
+  if (resetData.size > 0)
     CharacterRefresh(C, false);
 
   let returnVal = next(args);
