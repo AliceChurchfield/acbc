@@ -33,6 +33,9 @@ ACBC.DrawCharacterAssetMods = function(args, next)
 {
   /** @type {Character} */
   let C = args[0];
+
+  if (!C.ACBC) return next(args);
+
   /** @type {Map<any, Map<string, any>>} */
   let resetData = new Map;
   /**
