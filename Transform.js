@@ -20,17 +20,34 @@ if (ACBC.Classes === undefined) ACBC.Classes = {};
 
 ACBC.Classes.Tx = class
 {
-  OriginX = 0.5;  // How far across the character is the pivot point
-  OriginY = 0.98; // How far down the character is the pivot point
-  PosX = 0;   // Relative to wherever vanilla BC would otherwise put you
-  PosY = 0;   // Relative to wherever vanilla BC would otherwise put you
-  ScaleX = 1; // Relative to whatever scale you'd otherwise have
-  ScaleY = 1; // Relative to whatever scale you'd otherwise have
+  /** @todo Come up with a better way to have default values for classes */
+  OriginX;  // How far across the character is the pivot point
+  OriginY;  // How far down the character is the pivot point
+  PosX;     // Relative to wherever vanilla BC would otherwise put you
+  PosY;     // Relative to wherever vanilla BC would otherwise put you
+  ScaleX;   // Relative to whatever scale you'd otherwise have
+  ScaleY;   // Relative to whatever scale you'd otherwise have
+
+  constructor()
+  {
+    this.Reset();
+  }
 
   IsActive()
   {
+    /** @todo Maybe make this compare these properties to the defaults? */
     return this.PosX !== 0 || this.PosY !== 0 ||
            this.ScaleX !== 1 || this.ScaleY !== 1;
+  }
+
+  Reset()
+  {
+    this.OriginX = 0.5;
+    this.OriginY = 0.98;
+    this.PosX = 0;
+    this.PosY = 0;
+    this.ScaleX = 1;
+    this.ScaleY = 1;
   }
 };
 

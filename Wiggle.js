@@ -55,23 +55,16 @@ ACBC.DrawCharacterWithWiggle = function(args, next)
   /** @type {Character} */
   let C = args[0];
 
-  if (C?.ACBC)
+  if (C?.ACBC.Wiggling)
   {
-    if (C.ACBC.XOverride !== undefined)
-      args[1] += C.ACBC.XOverride;
+    C.ACBC.WiggleTimer += TimerRunInterval;
 
-    if (C.ACBC.Wiggling)
-    {
-      C.ACBC.WiggleTimer += TimerRunInterval;
-
-      let t = ACBC.WiggleTimer / ACBC.WiggleDuration
-      args[1] += ACBC.WiggleX(t);
-    }
+    let t = ACBC.WiggleTimer / ACBC.WiggleDuration
+    args[1] += ACBC.WiggleX(t);
   }
 
   return next(args);
 };
-Player.ACBC.XOverride = 0;
 
 
 /**
