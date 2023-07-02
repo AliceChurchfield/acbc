@@ -55,7 +55,7 @@ ACBC.DrawCharacterWithWiggle = function(args, next)
   /** @type {Character} */
   let C = args[0];
 
-  if (C?.ACBC.Wiggling)
+  if (C?.ACBC?.Wiggling)
   {
     C.ACBC.WiggleTimer += TimerRunInterval;
 
