@@ -1886,7 +1886,9 @@ ACBC.ActionRole = function(roleName, C, includeArmor = false, makeover = true)
   CharacterRefresh(C, true);
   ChatRoomCharacterUpdate(C);
 
-  C.ActionRole = role;
+  if (!C.ACBC)
+    C.ACBC = {};
+  C.ACBC.CurrentRole = role;
 };
 
 
@@ -1895,7 +1897,7 @@ ACBC.ActionArmor = function(C, colors, internal = false)
   C = ACBC.Find(C);
   if (!C) return;
 
-  colors = colors || C.ActionRole?.Colors;
+  colors = colors || C.ACBC?.CurrentRole?.Colors;
   if (!colors) return;
 
   InventoryWear(C, "MistressTop", "Cloth", colors.ArmorTop,
