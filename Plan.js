@@ -97,6 +97,11 @@ ACBC.PlanSet = class extends ACBC.Plan
     {
       let plan = this.Plans[i];
 
+      /**
+       * @todo
+       * I don't know how we'd get into this situation, where we have inactive
+       * plans in the set. Look into whether this is even necessary.
+       */
       if (!plan.Active)
       {
         this.Plans.splice(i, 1);
@@ -119,6 +124,13 @@ ACBC.PlanSet = class extends ACBC.Plan
         this.Plans.splice(i, 1);
         --i;
 
+        /**
+         * @todo
+         * Is this continue instruction necessary? This is always going to be
+         * the end of the loop body, right? Did I do this just in case I wanted
+         * to expand this loop later or something? Look into whether I should
+         * remove this.
+         */
         continue;
       }
     }
@@ -253,162 +265,91 @@ ACBC.PlanCall = class extends ACBC.Plan
   }
 };
 
+/** @todo Look into why this T appears to be unused */
 /** @extends ACBC.Plan */
-ACBC.PlanNumber = class extends ACBC.Plan
+/** @template T */
+ACBC.PlanProperty = class extends ACBC.Plan
 {
-  Name = "Number";
-  Start = -1;
-  End = -1;
-  /** @type {ACBC.Curve} */
-  Curve = null;
-
-  /**
-   * @param {number} end 
-   * @param {number} duration 
-   * @param {ACBC.Curve} curve 
-   */
-  constructor(end, duration, curve)
-  {
-    super();
-    this.End = end;
-    this.Remaining = this.Duration = duration;
-    this.Curve = curve;
-  }
-
-  /**
-   * Prepares the plan to be processed and updated
-   * @returns {void} Nothing
-   */
-  Initialize() {}
-  /**
-   * Does something with a number
-   * @param {number} value The value to set
-   * @returns {void} Nothing
-   */
-  Set(value) {}
-
-  /** @override */
-  Update(dt)
-  {
-    if (!this.Started)
-    {
-      this.Initialize();
-      this.Started = true;
-    }
-
-    this.Remaining -= dt;
-    let t = ACBC.Clamp01(this.Completion);
-
-    if (t === 0)
-      this.Set(this.Start);
-    else if (t === 1)
-      this.Set(this.End);
-    else
-      this.Set(this.Curve.Go(this.Start, this.End, t));
-    
-    return this.Remaining > 0 ?
-      ACBC.Plan.State.Running : ACBC.Plan.State.Completed;
-  }
-};
-
-/** @extends ACBC.Plan */
-ACBC.PlanColor = class extends ACBC.Plan
-{
-  Name = "Color";
-  Start = "";
-  End = "";
-  /** @type {ACBC.Curve} */
-  Curve = null;
-
-  /**
-   * @param {string} end 
-   * @param {number} duration 
-   * @param {ACBC.Curve} curve 
-   */
-  constructor(end, duration, curve)
-  {
-    super();
-    this.End = end;
-    this.Remaining = this.Duration = duration;
-    this.Curve = curve;
-  }
-
-  /**
-   * Prepares the plan to be processed and updated
-   * @returns {void} Nothing
-   */
-  Initialize() {}
-  /**
-   * Does something with a color
-   * @param {string} color The color to set
-   * @returns {void} Nothing
-   */
-  Set(color) {}
-
-  /** @override */
-  Update(dt)
-  {
-    if (!this.Started)
-    {
-      this.Initialize();
-      this.Started = true;
-    }
-
-    this.Remaining -= dt;
-    let t = ACBC.Clamp01(this.Completion);
-
-    if (t === 0)
-      this.Set(this.Start);
-    else if (t === 1)
-      this.Set(this.End);
-    else
-      this.Set(this.Curve.Go(this.Start, this.End, t));
-    
-    return this.Remaining > 0 ?
-      ACBC.Plan.State.Running : ACBC.Plan.State.Completed;
-  }
-};
-
-/** @extends ACBC.Plan */
-ACBC.PlanArousal = class extends ACBC.Plan
-{
-  /** @todo Implement this */
-};
-
-/** @extends ACBC.PlanNumberCycle */
-ACBC.SquishX = class extends ACBC.PlanNumberCycle
-{
-  constructor(end, duration, curve)
-  {
-    super();
-    this.End = end;
-    this.Duration = duration;
-    this.Curve = curve;
-  }
-
-  /** @override */
-  Initialize() { this.Start = ACBC.ScaleX; }
-  /** @override */
-  Set(scale) { ACBC.ScaleX = scale; }
-};
-
-/** @extends ACBC.PlanNumber */
-ACBC.PlanNumberProperty = class extends ACBC.PlanNumber
-{
+  Name = "Property";
+  /** @type {object} */
   Target;
+  /** @type {string} */
   PropertyName;
+  /** @type {T} */
+  Start;
+  /** @type {T} */
+  End;
+  /** @type {ACBC.Curve} */
+  Curve;
+  /** @type {boolean} */
+  Cycling;
 
-  constructor(target, propertyName, end, duration, curve)
+  /**
+   * @param {object} target 
+   * @param {string} propertyName 
+   * @param {T} end 
+   * @param {number} duration 
+   * @param {ACBC.Curve} curve 
+   * @param {boolean} cycling 
+   */
+  constructor(target, propertyName, end, duration, curve, cycling = false)
   {
-    super(end, duration, curve);
+    super();
     this.Target = target;
     this.PropertyName = propertyName;
+    this.End = end;
+    this.Remaining = this.Duration = duration;
+    this.Curve = curve;
+    this.Cycling = cycling;
+  }
+
+  /**
+   * Grabs the current value of the target property and stores it in Start
+   * @returns {void} Nothing
+   */
+  Initialize()
+  {
+    this.Start = this.Target[this.PropertyName];
+  }
+
+  /**
+   * Updates the target property with its new value as computed in Update
+   * @param {T} value The value to set
+   * @returns {void} Nothing
+   */
+  Set(value)
+  {
+    this.Target[this.PropertyName] = value;
   }
 
   /** @override */
-  Initialize() { this.Start = this.Target[this.PropertyName]; }
-  /** @override */
-  Set(value) { this.Target[this.PropertyName] = value; }
+  Update(dt)
+  {
+    if (!this.Started)
+    {
+      this.Initialize();
+      this.Started = true;
+    }
+
+    this.Remaining -= dt;
+    let t = ACBC.Clamp01(this.Completion);
+
+    if (t === 0)
+      this.Set(this.Start);
+    else if (t === 1)
+      this.Set(this.Cycling ? this.Start : this.End);
+    else
+      this.Set(this.Curve.Go(this.Start, this.End, t));
+    
+    return this.Remaining > 0 ?
+      ACBC.Plan.State.Running : ACBC.Plan.State.Completed;
+  }
+};
+
+/** @extends ACBC.PlanProperty */
+ACBC.PlanArousal = class extends ACBC.PlanProperty
+{
+  /** @todo Implement this */
 };
 
 

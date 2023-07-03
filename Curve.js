@@ -21,10 +21,11 @@ if (!window.ACBC)
  * @param {...number} args
  * @returns {number}
  */
+/** @template T */
 ACBC.Curve = class
 {
   /** @type {CurveFunction} */
-  Function = null;
+  Function;
   /** @type {number[]} */
   Parameters = [];
 
@@ -40,8 +41,8 @@ ACBC.Curve = class
 
   /**
    * 
-   * @param {number | string} start 
-   * @param {number | string} end 
+   * @param {T} start 
+   * @param {T} end 
    * @param {number} t 
    */
   Go(start, end, t)
