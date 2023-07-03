@@ -1,8 +1,8 @@
 /**
- * Ease.js
+ * Plan.js
  * 
  * @file
- *   Establishes the "ease" system of interpolating values
+ *   Establishes the "plan" system of interpolating values
  * @author   Alice Churchfield
  */
 
@@ -10,13 +10,13 @@
 
 if (!window.ACBC)
 {
-  console.warn("Running Ease.js outside of acbc.js");
+  console.warn("Running Plan.js outside of acbc.js");
   window.ACBC = {};
 }
 
 
 /** @abstract */
-ACBC.Ease = class
+ACBC.Plan = class
 {
   /** @enum {string} */
   static State =
@@ -25,7 +25,7 @@ ACBC.Ease = class
     Completed: "Completed",
   };
 
-  Name = "Base Ease";
+  Name = "Base Plan";
   Started = false;
   Completed = false;
   Active = true;
@@ -38,14 +38,14 @@ ACBC.Ease = class
   }
 
   /**
-   * Updates the ease, nudging it one step closer to completion
+   * Updates the plan, nudging it one step closer to completion
    * @virtual
    * @param {number} dt - Delta time in seconds
-   * @returns {ACBC.Ease.State} - The state of the ease following the update
+   * @returns {ACBC.Plan.State} - The state of the plan following the update
    */
-  Update(dt) { return ACBC.Ease.State.Completed; }
+  Update(dt) { return ACBC.Plan.State.Completed; }
   /**
-   * A chance for an ease to do something just before it's canceled
+   * A chance for a plan to do something just before it's canceled
    * @virtual
    * @returns {void} - Nothing
    */
@@ -64,122 +64,122 @@ ACBC.Ease = class
 
 
 /** @abstract */
-ACBC.EaseSet = class extends ACBC.Ease
+ACBC.PlanSet = class extends ACBC.Plan
 {
   Name = "Set";
-  /** @type {ACBC.Ease[]} */
-  Eases = [];
-  get Count() { return this.Eases.length; }
-  get Empty() { return this.Eases.length === 0; }
+  /** @type {ACBC.Plan[]} */
+  Plans = [];
+  get Count() { return this.Plans.length; }
+  get Empty() { return this.Plans.length === 0; }
 
   /**
-   * Adds an ease to this set's container of eases
-   * @param {ACBC.Ease} ease - The ease to add to the set
-   * @returns {ACBC.Ease} - The ease that was added (for chaining purposes)
+   * Adds a plan to this set's container of plans
+   * @param {ACBC.Plan} plan - The plan to add to the set
+   * @returns {ACBC.Plan} - The plan that was added (for chaining purposes)
    */
-  Add(ease)
+  Add(plan)
   {
-    this.Eases.push(ease);
-    return ease;
+    this.Plans.push(plan);
+    return plan;
   }
 
   /**
-   * Processes the eases in this set
+   * Processes the plans in this set
    * @param {number} dt - Delta time in seconds
    * @param {boolean} blocking
-   * Whether this set should update all of its eases or just the first one
+   * Whether this set should update all of its plans or just the first one
    * that's active. True for sequences, false for groups.
-   * @returns {ACBC.Ease.State} - The state of this set following this update
+   * @returns {ACBC.Plan.State} - The state of this set following this update
    */
-  ProcessEases(dt, blocking)
+  ProcessPlans(dt, blocking)
   {
     for (let i = 0; i < this.Count; ++i)
     {
-      let ease = this.Eases[i];
+      let plan = this.Plans[i];
 
-      if (!ease.Active)
+      if (!plan.Active)
       {
-        this.Eases.splice(i, 1);
+        this.Plans.splice(i, 1);
         --i;
 
         continue;
       }
 
-      let state = ease.Update(dt);
+      let state = plan.Update(dt);
 
-      if (state !== ACBC.Ease.State.Completed)
+      if (state !== ACBC.Plan.State.Completed)
       {
         if (blocking)
-          return ACBC.Ease.State.Running;
+          return ACBC.Plan.State.Running;
       }
       else
       {
-        ease.Completed = true;
-        ease.Active = false;
-        this.Eases.splice(i, 1);
+        plan.Completed = true;
+        plan.Active = false;
+        this.Plans.splice(i, 1);
         --i;
 
         continue;
       }
     }
 
-    return this.Empty ? ACBC.Ease.State.Completed : ACBC.Ease.State.Running;
+    return this.Empty ? ACBC.Plan.State.Completed : ACBC.Plan.State.Running;
   }
 
   /**
-   * Makes a new EaseGroup and adds it to this set
-   * @returns {ACBC.EaseGroup} The group that was made
+   * Makes a new PlanGroup and adds it to this set
+   * @returns {ACBC.PlanGroup} The group that was made
    */
   Group()
-  { return this.Add(new ACBC.EaseGroup()); }
+  { return this.Add(new ACBC.PlanGroup()); }
   /**
-   * Makes a new EaseSequence and adds it to this set
-   * @returns {ACBC.EaseSequence} The sequence that was made
+   * Makes a new PlanSequence and adds it to this set
+   * @returns {ACBC.PlanSequence} The sequence that was made
    */
   Sequence()
-  { return this.Add(new ACBC.EaseSequence()); }
+  { return this.Add(new ACBC.PlanSequence()); }
   /**
-   * Makes a new EaseDelay and adds it to this set
+   * Makes a new PlanDelay and adds it to this set
    * @param {number} duration The delay duration
-   * @returns {ACBC.EaseDelay} The ease that was made
+   * @returns {ACBC.PlanDelay} The plan that was made
    */
   Delay(duration)
-  { return this.Add(new ACBC.EaseDelay(duration)); }
+  { return this.Add(new ACBC.PlanDelay(duration)); }
   /**
-   * Makes a new EaseCall and adds it to this set
-   * @param {EaseCallback} callback The function to call
-   * @param {boolean} live @see EaseCallback for explanation
+   * Makes a new PlanCall and adds it to this set
+   * @param {PlanCallback} callback The function to call
+   * @param {boolean} live @see PlanCallback for explanation
    * @param  {any[] | LiveArg[]} args Any arguments to pass to the callback
-   * @returns {ACBC.EaseCall} The ease that was made
+   * @returns {ACBC.PlanCall} The plan that was made
    */
   Call(callback, live = false, ...args)
-  { return this.Add(new ACBC.EaseCall(callback, live, ...args)); }
+  { return this.Add(new ACBC.PlanCall(callback, live, ...args)); }
 };
 
 
-/** @extends ACBC.EaseSet */
-ACBC.EaseGroup = class extends ACBC.EaseSet
+/** @extends ACBC.PlanSet */
+ACBC.PlanGroup = class extends ACBC.PlanSet
 {
   Name = "Group";
   /** @override */
-  Update(dt) { return this.ProcessEases(dt, false); }
+  Update(dt) { return this.ProcessPlans(dt, false); }
 };
 
-/** @extends ACBC.EaseSet */
-ACBC.EaseSequence = class extends ACBC.EaseSet
+/** @extends ACBC.PlanSet */
+ACBC.PlanSequence = class extends ACBC.PlanSet
 {
   Name = "Sequence";
   /** @override */
-  Update(dt) { return this.ProcessEases(dt, true); }
+  Update(dt) { return this.ProcessPlans(dt, true); }
 };
 
-/** @extends ACBC.Ease */
-ACBC.EaseDelay = class extends ACBC.Ease
+/** @extends ACBC.Plan */
+ACBC.PlanDelay = class extends ACBC.Plan
 {
   Name = "Delay";
   /**
    * @param {number} duration
-   * How long to wait before moving on to the next ease in the set
+   * How long to wait before moving on to the next plan in the set
    */
   constructor(duration)
   {
@@ -194,13 +194,13 @@ ACBC.EaseDelay = class extends ACBC.Ease
     this.Remaining -= dt;
 
     return this.Remaining > 0 ?
-      ACBC.Ease.State.Running : ACBC.Ease.State.Completed;
+      ACBC.Plan.State.Running : ACBC.Plan.State.Completed;
   }
 };
 
 
 /**
- * @callback EaseCallback
+ * @callback PlanCallback
  * @param {...*} args
  * @returns {void}
  */
@@ -211,18 +211,18 @@ ACBC.EaseDelay = class extends ACBC.Ease
  * @prop {string} Key
  * The key to use to read the desired value from the given object
  */
-/** @extends ACBC.Ease */
-ACBC.EaseCall = class extends ACBC.Ease
+/** @extends ACBC.Plan */
+ACBC.PlanCall = class extends ACBC.Plan
 {
   Name = "Call";
-  /** @type {EaseCallback} */
+  /** @type {PlanCallback} */
   Callback = null;
   Live = false;
   /** @type {any[] | LiveArg[]} */
   Args = [];
 
   /**
-   * @param {EaseCallback} callback
+   * @param {PlanCallback} callback
    * The function to call
    * @param {boolean} live
    * Whether the arguments should be cached as they are when the action is
@@ -249,12 +249,12 @@ ACBC.EaseCall = class extends ACBC.Ease
     /** @todo Decide whether any further checking needs to be done here */
     this.Callback(...this.Args);
 
-    return ACBC.Ease.State.Completed;
+    return ACBC.Plan.State.Completed;
   }
 };
 
-/** @extends ACBC.Ease */
-ACBC.EaseNumber = class extends ACBC.Ease
+/** @extends ACBC.Plan */
+ACBC.PlanNumber = class extends ACBC.Plan
 {
   Name = "Number";
   Start = -1;
@@ -276,7 +276,7 @@ ACBC.EaseNumber = class extends ACBC.Ease
   }
 
   /**
-   * Prepares the ease to be processed and updated
+   * Prepares the plan to be processed and updated
    * @returns {void} Nothing
    */
   Initialize() {}
@@ -307,12 +307,12 @@ ACBC.EaseNumber = class extends ACBC.Ease
       this.Set(this.Curve.Go(this.Start, this.End, t));
     
     return this.Remaining > 0 ?
-      ACBC.Ease.State.Running : ACBC.Ease.State.Completed;
+      ACBC.Plan.State.Running : ACBC.Plan.State.Completed;
   }
 };
 
-/** @extends ACBC.Ease */
-ACBC.EaseColor = class extends ACBC.Ease
+/** @extends ACBC.Plan */
+ACBC.PlanColor = class extends ACBC.Plan
 {
   Name = "Color";
   Start = "";
@@ -334,7 +334,7 @@ ACBC.EaseColor = class extends ACBC.Ease
   }
 
   /**
-   * Prepares the ease to be processed and updated
+   * Prepares the plan to be processed and updated
    * @returns {void} Nothing
    */
   Initialize() {}
@@ -365,18 +365,18 @@ ACBC.EaseColor = class extends ACBC.Ease
       this.Set(this.Curve.Go(this.Start, this.End, t));
     
     return this.Remaining > 0 ?
-      ACBC.Ease.State.Running : ACBC.Ease.State.Completed;
+      ACBC.Plan.State.Running : ACBC.Plan.State.Completed;
   }
 };
 
-/** @extends ACBC.Ease */
-ACBC.EaseArousal = class extends ACBC.Ease
+/** @extends ACBC.Plan */
+ACBC.PlanArousal = class extends ACBC.Plan
 {
   /** @todo Implement this */
 };
 
-/** @extends ACBC.EaseNumberCycle */
-ACBC.SquishX = class extends ACBC.EaseNumberCycle
+/** @extends ACBC.PlanNumberCycle */
+ACBC.SquishX = class extends ACBC.PlanNumberCycle
 {
   constructor(end, duration, curve)
   {
@@ -392,8 +392,8 @@ ACBC.SquishX = class extends ACBC.EaseNumberCycle
   Set(scale) { ACBC.ScaleX = scale; }
 };
 
-/** @extends ACBC.EaseNumber */
-ACBC.EaseNumberProperty = class extends ACBC.EaseNumber
+/** @extends ACBC.PlanNumber */
+ACBC.PlanNumberProperty = class extends ACBC.PlanNumber
 {
   Target;
   PropertyName;
@@ -412,4 +412,4 @@ ACBC.EaseNumberProperty = class extends ACBC.EaseNumber
 };
 
 
-console.log(" * Ease.js loaded.");
+console.log(" * Plan.js loaded.");

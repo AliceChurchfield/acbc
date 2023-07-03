@@ -64,7 +64,7 @@ AddAcbcScript("Time.js");
 AddAcbcScript("Math.js");
 AddAcbcScript("Color.js");
 AddAcbcScript("Curve.js");
-AddAcbcScript("Ease.js");
+AddAcbcScript("Plan.js");
 AddAcbcScript("Transform.js");
 AddAcbcScript("Assets.js");
 
