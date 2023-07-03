@@ -312,64 +312,6 @@ ACBC.EaseNumber = class extends ACBC.Ease
 };
 
 /** @extends ACBC.Ease */
-ACBC.EaseNumberCycle = class extends ACBC.EaseNumber
-{
-  Name = "NumberCycle";
-  Start = -1;
-  End = -1;
-  /** @type {ACBC.Curve} */
-  Curve = null;
-
-  /**
-   * @param {number} end 
-   * @param {number} duration 
-   * @param {ACBC.Curve} curve 
-   */
-  constructor(end, duration, curve)
-  {
-    super();
-    this.End = end;
-    this.Remaining = this.Duration = duration;
-    this.Curve = curve;
-  }
-
-  /**
-   * Prepares the ease to be processed and updated
-   * @returns {void} Nothing
-   */
-  Initialize() {}
-  /**
-   * Does something with a number
-   * @param {number} value The value to set
-   * @returns {void} Nothing
-   */
-  Set(value) {}
-
-  /** @override */
-  Update(dt)
-  {
-    if (!this.Started)
-    {
-      this.Initialize();
-      this.Started = true;
-    }
-
-    this.Remaining -= dt;
-    let t = ACBC.Clamp01(this.Completion);
-
-    if (t === 0)
-      this.Set(this.Start);
-    else if (t === 1)
-      this.Set(this.Start);
-    else
-      this.Set(this.Curve.Go(this.Start, this.End, t));
-    
-    return this.Remaining > 0 ?
-      ACBC.Ease.State.Running : ACBC.Ease.State.Completed;
-  }
-};
-
-/** @extends ACBC.Ease */
 ACBC.EaseColor = class extends ACBC.Ease
 {
   Name = "Color";
@@ -448,6 +390,25 @@ ACBC.SquishX = class extends ACBC.EaseNumberCycle
   Initialize() { this.Start = ACBC.ScaleX; }
   /** @override */
   Set(scale) { ACBC.ScaleX = scale; }
+};
+
+/** @extends ACBC.EaseNumber */
+ACBC.EaseNumberProperty = class extends ACBC.EaseNumber
+{
+  Target;
+  PropertyName;
+
+  constructor(target, propertyName, end, duration, curve)
+  {
+    super(end, duration, curve);
+    this.Target = target;
+    this.PropertyName = propertyName;
+  }
+
+  /** @override */
+  Initialize() { this.Start = this.Target[this.PropertyName]; }
+  /** @override */
+  Set(value) { this.Target[this.PropertyName] = value; }
 };
 
 
