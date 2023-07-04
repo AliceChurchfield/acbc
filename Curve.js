@@ -21,7 +21,7 @@ if (!window.ACBC)
  * @param {...number} args
  * @returns {number}
  */
-ACBC.Curve = class
+ACBC.Curve = class Curve
 {
   /** @type {CurveFunction} */
   Function;
@@ -63,7 +63,7 @@ ACBC.Curve = class
     return y3(t);
   }
 
-  static Quad = class
+  static Quad = class Quad
   {
     static In(t) { return t * t; }
     static Out(t) { return t * (2 - t); }
@@ -73,41 +73,44 @@ ACBC.Curve = class
     }
   };
 
-  static Power = class
+  static Power = class Power
   {
     static In(t, exponent) { return Math.pow(t, exponent); }
     static Out(t, exponent) { return Math.pow(t, exponent); }
     static InOut(t, exponent)
     {
       if (t < 0.5)
-        return this.In(2 * t, exponent) / 2;
+        return ACBC.Curve.Power.In(2 * t, exponent) / 2;
       else
-        return (this.Out(2 * t - 1, exponent) + 1) / 2;
+        return (ACBC.Curve.Power.Out(2 * t - 1, exponent) + 1) / 2;
     }
   };
 
-  static Warp = class
+  static Warp = class Warp
   {
     /** @constant */
     static Quantum = 7.9579e-12;
 
     static In(t, scale)
     {
-      return t > 1 - this.Quantum ? -Infinity : scale * (1 + 1 / (t * t - 1));
+      return t > 1 - ACBC.Curve.Warp.Quantum ?
+        -Infinity : scale * (1 + 1 / (t * t - 1));
     }
     static Out(t, scale)
     {
-      return t < this.Quantum ? Infinity : 1 - this.In(t - 1, scale);
+      return t < ACBC.Curve.Warp.Quantum ?
+        Infinity : 1 - ACBC.Curve.Warp.In(t - 1, scale);
     }
     static InOut(t, scale)
     {
       return t < 0.5 ?
-        this.In(2 * t, scale) / 2 : (this.Out(2 * t - 1, scale) + 1) / 2;
+        ACBC.Curve.Warp.In(2 * t, scale) / 2 :
+        (ACBC.Curve.Warp.Out(2 * t - 1, scale) + 1) / 2;
     }
   };
 
   /** @todo Plot this in Desmos to see whether it's actually good */
-  static Elastic = class
+  static Elastic = class Elastic
   {
     /** @constant */
     static PowerCoefficient = 0.0009765625; // for default exponent of 10
@@ -118,7 +121,7 @@ ACBC.Curve = class
 
       let valueAtX = Math.pow(2, exponent * (t - 1)) *
         Math.cos(2 * Math.PI * (t - 1) / period);
-      let verticalShift = this.PowerCoefficient *
+      let verticalShift = ACBC.Curve.Elastic.PowerCoefficient *
         Math.cos(2 * Math.PI / period);
       let verticalScale = 1 - verticalShift;
 
@@ -129,8 +132,8 @@ ACBC.Curve = class
     {
       if (period === 0) return 1;
 
-      let verticalScale =
-        1 - this.PowerCoefficient * Math.cos(2 * Math.PI / period);
+      let verticalScale = 1 - ACBC.Curve.Elastic.PowerCoefficient *
+        Math.cos(2 * Math.PI / period);
       
       return (1 - Math.pow(2, -exponent * t) *
         Math.cos(2 * Math.PI * t / period)) / verticalScale;
@@ -139,13 +142,13 @@ ACBC.Curve = class
     static InOut(t, period = 0.3, exponent = 10)
     {
       if (t < 0.5)
-        return this.In(2 * t, period, exponent) / 2
+        return ACBC.Curve.Elastic.In(2 * t, period, exponent) / 2
       else
-        return (this.Out(2 * t - 1, period, exponent) + 1) / 2;
+        return (ACBC.Curve.Elastic.Out(2 * t - 1, period, exponent) + 1) / 2;
     }
   };
 
-  static Back = class
+  static Back = class Back
   {
     static In(t, scale = 2)
     {
@@ -161,11 +164,12 @@ ACBC.Curve = class
     static InOut(t, scale = 2)
     {
       return t < 0.5 ?
-        this.In(2 * t, scale) / 2 : (this.Out(2 * t - 1, scale) + 1) / 2
+        ACBC.Curve.Back.In(2 * t, scale) / 2 :
+        (ACBC.Curve.Back.Out(2 * t - 1, scale) + 1) / 2
     }
   };
 
-  static Bounce = class
+  static Bounce = class Bounce
   {
     static #S(x)
     {
@@ -183,25 +187,26 @@ ACBC.Curve = class
 
     static In(t)
     {
-      return 1 - this.Out(1 - t);
+      return 1 - ACBC.Curve.Bounce.Out(1 - t);
     }
 
     static Out(t)
     {
-      if (t < this.#S(-1)) return this.#B(t, 0);
-      if (t < this.#S(0)) return this.#B(t, 1);
-      if (t < this.#S(1)) return this.#B(t, 2);
-      if (t < this.#S(2)) return this.#B(t, 3);
-      if (t < this.#S(3)) return this.#B(t, 4);
-      if (t < this.#S(4)) return this.#B(t, 5);
-      if (t < this.#S(5)) return this.#B(t, 6);
-      return this.#B(t, 7);
+      if (t < ACBC.Curve.Bounce.#S(-1)) return ACBC.Curve.Bounce.#B(t, 0);
+      if (t < ACBC.Curve.Bounce.#S(0)) return ACBC.Curve.Bounce.#B(t, 1);
+      if (t < ACBC.Curve.Bounce.#S(1)) return ACBC.Curve.Bounce.#B(t, 2);
+      if (t < ACBC.Curve.Bounce.#S(2)) return ACBC.Curve.Bounce.#B(t, 3);
+      if (t < ACBC.Curve.Bounce.#S(3)) return ACBC.Curve.Bounce.#B(t, 4);
+      if (t < ACBC.Curve.Bounce.#S(4)) return ACBC.Curve.Bounce.#B(t, 5);
+      if (t < ACBC.Curve.Bounce.#S(5)) return ACBC.Curve.Bounce.#B(t, 6);
+      return ACBC.Curve.Bounce.#B(t, 7);
     }
 
     static InOut(t)
     {
       return t < 0.5 ?
-        this.In(2 * t) / 2 : (this.Out(2 * t - 1) + 1) / 2;
+        ACBC.Curve.Bounce.In(2 * t) / 2 :
+        (ACBC.Curve.Bounce.Out(2 * t - 1) + 1) / 2;
     }
   };
 };
