@@ -17,6 +17,19 @@ if (!window.ACBC)
   window.ACBC = {};
 }
 
+
+ACBC.Sleep = function(duration)
+{
+  return new Promise((resolve) => setTimeout(resolve, duration));
+};
+
+
+ACBC.WaitFor = async function(func)
+{
+  while (!func()) await ACBC.Sleep(100);
+};
+
+
 let Private = {};
 ACBC.Private = Private;
 
@@ -954,18 +967,6 @@ Private.BindingHelper = function(C, name, difficulty, color)
 {
 
 };
-
-
-ACBC.Sleep = function(duration)
-{
-  return new Promise((resolve) => setTimeout(resolve, duration));
-};
-
-
-ACBC.WaitFor = async function(func)
-{
-  while (!func()) await ACBC.Sleep(100);
-}
 
 
 ACBC.SurprisedEyes = async function(C)
@@ -3270,6 +3271,8 @@ ACBC.HornyVoidSets.Tentacles =
 
 
 //////////////////////////
+await ACBC.WaitFor(ACBC.IsLoadingComplete);
+
 Private.Initialize();
 
 console.log(" * acbc-main.js loaded.");

@@ -26,16 +26,26 @@ const MOD_API = bcModSdk.registerMod(
   repository: "https://github.com/AliceChurchfield/acbc.git",
 }, { allowReplace: true });
 
-if (!window.ACBC) window.ACBC = { Private: {} };
+if (!window.ACBC) window.ACBC =
+{
+  Private: {},
+  LoadingElementCount: 0,
+  IsLoadingComplete: function() { return LoadingElementCount <= 0; },
+};
 
 ACBC.ModApi = MOD_API;
 
 function AddScript(src)
 {
+  ++ACBC.LoadingElementCount;
   const script = document.createElement("script");
   script.setAttribute("crossorigin", "anonymous");
   script.setAttribute("src", src);
-  script.addEventListener("load", (e)=>script.remove());
+  script.addEventListener("load", (e) =>
+  {
+    --ACBC.LoadingElementCount;
+    script.remove();
+  });
   document.head.appendChild(script);
 }
 
