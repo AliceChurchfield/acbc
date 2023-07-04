@@ -48,4 +48,16 @@
 			"",
 		],
 	},
+	"New ACBC class":
+	{
+		"description": "Sets up a new ACBC class",
+		"prefix": "newclass",
+		"body":
+		[
+			"ACBC.${1:ClassName} = class ${1:ClassName}",
+			"{",
+			"  $0",
+			"};",
+		],
+	},
 }

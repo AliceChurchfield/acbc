@@ -15,10 +15,7 @@ if (!window.ACBC)
 }
 
 
-if (ACBC.Classes === undefined) ACBC.Classes = {};
-
-
-ACBC.Classes.Tx = class
+ACBC.Tx = class Tx extends ACBC.Component
 {
   /** @todo Come up with a better way to have default values for classes */
   OriginX;  // How far across the character is the pivot point
@@ -30,6 +27,7 @@ ACBC.Classes.Tx = class
 
   constructor()
   {
+    super();
     this.Reset();
   }
 
@@ -52,7 +50,7 @@ ACBC.Classes.Tx = class
 };
 
 
-if (ACBC.Tx === undefined) ACBC.Tx = new ACBC.Classes.Tx();
+if (ACBC.Tx === undefined) ACBC.Tx = new ACBC.Tx();
 ACBC.ActiveTx = null;
 
 
@@ -78,7 +76,7 @@ ACBC.DrawCharacterTx = function(args, next)
 ACBC.DrawImageExTx = function(args, next)
 {
   let opts = args[3] || {};
-  /** @type {ACBC.Classes.Tx} */
+  /** @type {ACBC.Tx} */
   let activeTx = ACBC.ActiveTx;
 
   if (activeTx)

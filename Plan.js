@@ -16,7 +16,7 @@ if (!window.ACBC)
 
 
 /** @abstract */
-ACBC.Plan = class
+ACBC.Plan = class Plan
 {
   /** @enum {string} */
   static State =
@@ -52,7 +52,7 @@ ACBC.Plan = class
   OnCanceled() {}
 
   /**
-   * Terminates the action prematurely
+   * Terminates the plan prematurely
    * @returns {void} - Nothing
    */
   Cancel()
@@ -64,7 +64,7 @@ ACBC.Plan = class
 
 
 /** @abstract */
-ACBC.PlanSet = class extends ACBC.Plan
+ACBC.PlanSet = class PlanSet extends ACBC.Plan
 {
   Name = "Set";
   /** @type {ACBC.Plan[]} */
@@ -170,7 +170,7 @@ ACBC.PlanSet = class extends ACBC.Plan
 
 
 /** @extends ACBC.PlanSet */
-ACBC.PlanGroup = class extends ACBC.PlanSet
+ACBC.PlanGroup = class PlanGroup extends ACBC.PlanSet
 {
   Name = "Group";
   /** @override */
@@ -178,7 +178,7 @@ ACBC.PlanGroup = class extends ACBC.PlanSet
 };
 
 /** @extends ACBC.PlanSet */
-ACBC.PlanSequence = class extends ACBC.PlanSet
+ACBC.PlanSequence = class PlanSequence extends ACBC.PlanSet
 {
   Name = "Sequence";
   /** @override */
@@ -186,7 +186,7 @@ ACBC.PlanSequence = class extends ACBC.PlanSet
 };
 
 /** @extends ACBC.Plan */
-ACBC.PlanDelay = class extends ACBC.Plan
+ACBC.PlanDelay = class PlanDelay extends ACBC.Plan
 {
   Name = "Delay";
   /**
@@ -224,7 +224,7 @@ ACBC.PlanDelay = class extends ACBC.Plan
  * The key to use to read the desired value from the given object
  */
 /** @extends ACBC.Plan */
-ACBC.PlanCall = class extends ACBC.Plan
+ACBC.PlanCall = class PlanCall extends ACBC.Plan
 {
   Name = "Call";
   /** @type {PlanCallback} */
@@ -268,7 +268,7 @@ ACBC.PlanCall = class extends ACBC.Plan
 /** @todo Look into why this T appears to be unused */
 /** @extends ACBC.Plan */
 /** @template T */
-ACBC.PlanProperty = class extends ACBC.Plan
+ACBC.PlanProperty = class PlanProperty extends ACBC.Plan
 {
   Name = "Property";
   /** @type {object} */
@@ -309,6 +309,13 @@ ACBC.PlanProperty = class extends ACBC.Plan
    */
   Initialize()
   {
+    /** @todo Look into whether this is necessary or if it's bad */
+    if (!this.Target)
+    {
+      this.Active = false;
+      return;
+    }
+
     this.Start = this.Target[this.PropertyName];
   }
 
@@ -319,6 +326,13 @@ ACBC.PlanProperty = class extends ACBC.Plan
    */
   Set(value)
   {
+    /** @todo Look into whether this is necessary or if it's bad */
+    if (!this.Target)
+    {
+      this.Active = false;
+      return;
+    }
+
     this.Target[this.PropertyName] = value;
   }
 
@@ -347,7 +361,7 @@ ACBC.PlanProperty = class extends ACBC.Plan
 };
 
 /** @extends ACBC.PlanProperty */
-ACBC.PlanArousal = class extends ACBC.PlanProperty
+ACBC.PlanArousal = class PlanArousal extends ACBC.PlanProperty
 {
   /** @todo Implement this */
 };

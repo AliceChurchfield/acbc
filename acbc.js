@@ -65,8 +65,11 @@ AddAcbcScript("Math.js");
 AddAcbcScript("Color.js");
 AddAcbcScript("Curve.js");
 AddAcbcScript("Plan.js");
-AddAcbcScript("Transform.js");
 AddAcbcScript("Assets.js");
+
+AddAcbcScript("Component.js");
+AddAcbcScript("Transform.js");
+AddAcbcScript("Acbca.js");
 
 })();
 
