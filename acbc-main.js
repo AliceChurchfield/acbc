@@ -500,8 +500,10 @@ if (!Player.HornyVoidWhitelist)
 }
 
 
-Private.Initialize = function()
+Private.Initialize = async function()
 {
+  await ACBC.WaitFor(ACBC.IsLoadingComplete);
+
   console.log("Initializing ACBC....");
 
   Private.KidnappingFavoritesSetup();
@@ -3271,8 +3273,6 @@ ACBC.HornyVoidSets.Tentacles =
 
 
 //////////////////////////
-await ACBC.WaitFor(ACBC.IsLoadingComplete);
-
 Private.Initialize();
 
 console.log(" * acbc-main.js loaded.");
