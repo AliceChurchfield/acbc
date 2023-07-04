@@ -30,7 +30,7 @@ if (!window.ACBC) window.ACBC =
 {
   Private: {},
   LoadingElementCount: 0,
-  IsLoadingComplete: function() { return LoadingElementCount <= 0; },
+  IsLoadingComplete: function() { return ACBC.LoadingElementCount <= 0; },
 };
 
 ACBC.ModApi = MOD_API;
