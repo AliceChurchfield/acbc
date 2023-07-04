@@ -180,13 +180,15 @@ ACBC.PlanSet = class PlanSet extends ACBC.Plan
    * @param {number} duration How long the plan should take
    * @param {ACBC.Curve} curve An easing curve. Quad.InOut by default
    * @param {boolean} cycling Whether this property should end where it starts
+   * @param {()=>any} postSetter A function that gets called after Set
+   * @param {...*} args Any arguments to pass into the PostSetter
    * @returns {ACBC.PlanSet} This set (for chaining)
    */
   Property(target, propertyName, end, duration,
-    curve = new ACBC.Curve, cycling = false)
+    curve = new ACBC.Curve, cycling = false, postSetter = null, ...args)
   {
     this.Add(new ACBC.PlanProperty(target, propertyName, end, duration,
-      curve, cycling));
+      curve, cycling, postSetter, ...args));
     return this;
   }
 };
@@ -315,7 +317,7 @@ ACBC.PlanProperty = class PlanProperty extends ACBC.Plan
    * @param {number} duration 
    * @param {ACBC.Curve} curve 
    * @param {boolean} cycling 
-   * @param {Function} postSetter
+   * @param {()=>any} postSetter
    * @param {...*} args
    */
   constructor(target, propertyName, end, duration,
@@ -365,7 +367,7 @@ ACBC.PlanProperty = class PlanProperty extends ACBC.Plan
     this.Target[this.PropertyName] = value;
 
     if (typeof this.PostSetter === "function")
-      this.PostSetter(this.PostSetterArgs);
+      this.PostSetter(...this.PostSetterArgs);
   }
 
   /** @override */

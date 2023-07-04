@@ -76,7 +76,7 @@ ACBC.Curve = class Curve
   static Power = class Power
   {
     static In(t, exponent) { return Math.pow(t, exponent); }
-    static Out(t, exponent) { return Math.pow(t, exponent); }
+    static Out(t, exponent) { return 1 - Math.pow(1 - t, exponent); }
     static InOut(t, exponent)
     {
       if (t < 0.5)
