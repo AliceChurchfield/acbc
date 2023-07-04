@@ -496,6 +496,8 @@ Private.Initialize = function()
   Private.FbcEmoteTriggerSetup();
 
   Player.ACBC = ACBC;
+
+  ACBC.CharacterSetup(Player);
 };
 
 

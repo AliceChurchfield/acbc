@@ -34,7 +34,7 @@ ACBC.DrawCharacterAssetMods = function(args, next)
   /** @type {Character} */
   let C = args[0];
 
-  if (!C.ACBC?.Tx) return next(args);
+  if (!C.Acbca?.Tx) return next(args);
 
   /** @type {Map<any, Map<string, any>>} */
   let resetData = new Map;
@@ -46,7 +46,7 @@ ACBC.DrawCharacterAssetMods = function(args, next)
   {
     let asset = item.Asset;
     let groupName = asset.Group.Name;
-    let groupData = C.ACBC.Assets[groupName];
+    let groupData = ACBC.Assets[groupName];
     if (!groupData) continue;
 
     let assetName = asset.Name;
@@ -57,8 +57,8 @@ ACBC.DrawCharacterAssetMods = function(args, next)
     {
       let left = asset.DrawingLeft ?? asset.Group.DrawingLeft;
       let top = asset.DrawingTop ?? asset.Group.DrawingTop;
-      left -= C.ACBC.Tx.PosX;
-      top -= C.ACBC.Tx.PosY;
+      left -= C.Acbca.Tx.PosX;
+      top -= C.Acbca.Tx.PosY;
 
       /**
        * @todo If necessary, generalize this to check for any differences in

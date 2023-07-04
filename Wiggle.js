@@ -34,11 +34,10 @@ ACBC.WiggleFrequency = 3; // in Hz
 ACBC.BeginWiggling = function(C)
 {
   C = ACBC.Find(C);
-  if (!C) return;
-  if (!C.ACBC) C.ACBC = {};
+  if (!C?.Acbca) return;
 
-  C.ACBC.Wiggling = true;
-  C.ACBC.WiggleTimer = 0;
+  ACBC.Wiggling = true;
+  ACBC.WiggleTimer = 0;
 
   setTimeout(ACBC.EndWiggling, ACBC.WiggleDuration, C);
 };
@@ -55,9 +54,9 @@ ACBC.DrawCharacterWithWiggle = function(args, next)
   /** @type {Character} */
   let C = args[0];
 
-  if (C?.ACBC?.Wiggling)
+  if (C?.Acbca?.Wiggling)
   {
-    C.ACBC.WiggleTimer += TimerRunInterval;
+    ACBC.WiggleTimer += TimerRunInterval;
 
     let t = ACBC.WiggleTimer / ACBC.WiggleDuration
     args[1] += ACBC.WiggleX(t);

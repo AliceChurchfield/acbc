@@ -25,9 +25,9 @@ ACBC.Tx = class Tx extends ACBC.Component
   ScaleX;   // Relative to whatever scale you'd otherwise have
   ScaleY;   // Relative to whatever scale you'd otherwise have
 
-  constructor()
+  constructor(owner)
   {
-    super();
+    super(owner);
     this.Reset();
   }
 
@@ -50,7 +50,6 @@ ACBC.Tx = class Tx extends ACBC.Component
 };
 
 
-if (ACBC.Tx === undefined) ACBC.Tx = new ACBC.Tx();
 ACBC.ActiveTx = null;
 
 
@@ -59,7 +58,7 @@ ACBC.DrawCharacterTx = function(args, next)
   /** @type {Character} */
   let C = args[0];
 
-  ACBC.ActiveTx = C?.ACBC?.Tx;
+  ACBC.ActiveTx = C?.Acbca?.Tx;
   let returnVal = next(args);
   ACBC.ActiveTx = null;
 
