@@ -21,7 +21,6 @@ if (!window.ACBC)
  * @param {...number} args
  * @returns {number}
  */
-/** @template T */
 ACBC.Curve = class
 {
   /** @type {CurveFunction} */
@@ -33,7 +32,7 @@ ACBC.Curve = class
    * @param {CurveFunction} func 
    * @param  {...number} args 
    */
-  constructor(func, ...args)
+  constructor(func = ACBC.Curve.Quad.InOut, ...args)
   {
     this.Function = func;
     this.Parameters = args;
@@ -41,8 +40,8 @@ ACBC.Curve = class
 
   /**
    * 
-   * @param {T} start 
-   * @param {T} end 
+   * @param {number | string} start 
+   * @param {number | string} end 
    * @param {number} t 
    */
   Go(start, end, t)

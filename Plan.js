@@ -140,34 +140,56 @@ ACBC.PlanSet = class PlanSet extends ACBC.Plan
 
   /**
    * Makes a new PlanGroup and adds it to this set
-   * @returns {ACBC.PlanGroup} The group that was made
+   * @returns {ACBC.PlanGroup} The group that was made (for chaining)
    */
   Group()
   { return this.Add(new ACBC.PlanGroup()); }
   /**
    * Makes a new PlanSequence and adds it to this set
-   * @returns {ACBC.PlanSequence} The sequence that was made
+   * @returns {ACBC.PlanSequence} The sequence that was made (for chaining)
    */
   Sequence()
   { return this.Add(new ACBC.PlanSequence()); }
   /**
    * Makes a new PlanDelay and adds it to this set
    * @param {number} duration The delay duration
-   * @returns {ACBC.PlanDelay} The plan that was made
+   * @returns {ACBC.PlanSet} This set (for chaining)
    */
   Delay(duration)
-  { return this.Add(new ACBC.PlanDelay(duration)); }
+  {
+    this.Add(new ACBC.PlanDelay(duration));
+    return this;
+  }
   /**
    * Makes a new PlanCall and adds it to this set
    * @param {PlanCallback} callback The function to call
    * @param {boolean} live @see PlanCallback for explanation
    * @param  {any[] | LiveArg[]} args Any arguments to pass to the callback
-   * @returns {ACBC.PlanCall} The plan that was made
+   * @returns {ACBC.PlanSet} This set (for chaining)
    */
   Call(callback, live = false, ...args)
-  { return this.Add(new ACBC.PlanCall(callback, live, ...args)); }
+  {
+    this.Add(new ACBC.PlanCall(callback, live, ...args));
+    return this;
+  }
+  /**
+   * Makes a new PlanProperty and adds it to this set
+   * @param {object} target The object whose property should be affected
+   * @param {string} propertyName The property to affect
+   * @param {number | string} end The value the property should have at the end
+   * @param {number} duration How long the plan should take
+   * @param {ACBC.Curve} curve An easing curve. Quad.InOut by default
+   * @param {boolean} cycling Whether this property should end where it starts
+   * @returns {ACBC.PlanSet} This set (for chaining)
+   */
+  Property(target, propertyName, end, duration,
+    curve = new ACBC.Curve, cycling = false)
+  {
+    this.Add(new ACBC.PlanProperty(target, propertyName, end, duration,
+      curve, cycling));
+    return this;
+  }
 };
-
 
 /** @extends ACBC.PlanSet */
 ACBC.PlanGroup = class PlanGroup extends ACBC.PlanSet
@@ -209,7 +231,6 @@ ACBC.PlanDelay = class PlanDelay extends ACBC.Plan
       ACBC.Plan.State.Running : ACBC.Plan.State.Completed;
   }
 };
-
 
 /**
  * @callback PlanCallback
@@ -265,9 +286,7 @@ ACBC.PlanCall = class PlanCall extends ACBC.Plan
   }
 };
 
-/** @todo Look into why this T appears to be unused */
 /** @extends ACBC.Plan */
-/** @template T */
 ACBC.PlanProperty = class PlanProperty extends ACBC.Plan
 {
   Name = "Property";
@@ -275,24 +294,32 @@ ACBC.PlanProperty = class PlanProperty extends ACBC.Plan
   Target;
   /** @type {string} */
   PropertyName;
-  /** @type {T} */
+  /** @type {number | string} */
   Start;
-  /** @type {T} */
+  /** @type {number | string} */
   End;
   /** @type {ACBC.Curve} */
   Curve;
   /** @type {boolean} */
   Cycling;
+  /** @type {()=>any} */
+  PostSetter;
+  /** @type {any[]} */
+  PostSetterArgs;
 
+  /** @todo Consider allowing for "live args" as with the PlanCall class */
   /**
    * @param {object} target 
    * @param {string} propertyName 
-   * @param {T} end 
+   * @param {number | string} end 
    * @param {number} duration 
    * @param {ACBC.Curve} curve 
    * @param {boolean} cycling 
+   * @param {Function} postSetter
+   * @param {...*} args
    */
-  constructor(target, propertyName, end, duration, curve, cycling = false)
+  constructor(target, propertyName, end, duration,
+    curve = new ACBC.Curve, cycling = false, postSetter = null, ...args)
   {
     super();
     this.Target = target;
@@ -301,6 +328,8 @@ ACBC.PlanProperty = class PlanProperty extends ACBC.Plan
     this.Remaining = this.Duration = duration;
     this.Curve = curve;
     this.Cycling = cycling;
+    this.PostSetter = postSetter;
+    this.PostSetterArgs = args;
   }
 
   /**
@@ -321,7 +350,7 @@ ACBC.PlanProperty = class PlanProperty extends ACBC.Plan
 
   /**
    * Updates the target property with its new value as computed in Update
-   * @param {T} value The value to set
+   * @param {number | string} value The value to set
    * @returns {void} Nothing
    */
   Set(value)
@@ -334,6 +363,9 @@ ACBC.PlanProperty = class PlanProperty extends ACBC.Plan
     }
 
     this.Target[this.PropertyName] = value;
+
+    if (typeof this.PostSetter === "function")
+      this.PostSetter(this.PostSetterArgs);
   }
 
   /** @override */
