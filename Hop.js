@@ -21,8 +21,10 @@ ACBC.Hop = class Hop extends ACBC.Component
   static SpeedVariance = 30;
   static SquishAspectRatio = 2; // X / Y
   static PostSquishFactor = 1;
-  static MaxHopSpeed = ACBC.Hop.SpeedBase + ACBC.Hop.SpeedVariance;
-  static MaxHopEnergy = ACBC.Hop.ComputeEnergy(ACBC.Hop.MaxHopSpeed);
+  static get MaxHopSpeed()
+  { return ACBC.Hop.SpeedBase + ACBC.Hop.SpeedVariance; }
+  static get MaxHopEnergy()
+  { return ACBC.Hop.ComputeEnergy(ACBC.Hop.MaxHopSpeed); }
   
   /**
    * Calculates and returns the amount of energy to produce the given speed
