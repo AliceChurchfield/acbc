@@ -158,6 +158,9 @@ ACBC.Acbca = class Acbca
   Dispatch(eventName, eventData)
   {
     let handlers = this.EventConnections.get(eventName);
+
+    if (!handlers) return;
+    
     for (const handler of handlers)
       handler(eventData);
   }
