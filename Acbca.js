@@ -71,10 +71,11 @@ ACBC.Acbca = class Acbca
       component.Update(dt);
     for (const component of this.PhysicsUpdaters)
       component.PhysicsUpdate(dt);
-    for (const component of this.LateUpdaters)
-      component.LateUpdate(dt);
       
     this.Plans.Update(dt);
+
+    for (const component of this.LateUpdaters)
+      component.LateUpdate(dt);
   }
 };
 

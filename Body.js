@@ -17,6 +17,12 @@ if (!window.ACBC)
 
 ACBC.Body = class Body extends ACBC.Component
 {
+  static PosXMin = -1000;
+  static PosXMax = 1000;
+  static PosYMin = -1000;
+  static PosYMax = 1000;
+  static SleepTimeout = 1;
+
   /**
    * @type {ACBC.Tx}
    * The transform of this body. Its Pos values are what this body modifies
@@ -42,6 +48,11 @@ ACBC.Body = class Body extends ACBC.Component
    * Whether physics should move this body around
    */
   Awake;
+  /**
+   * @type {number}
+   * Resets when this body moves. If it reaches SleepTimeout, the body sleeps
+   */
+  SleepTimer;
 
   constructor(owner)
   {
@@ -58,12 +69,54 @@ ACBC.Body = class Body extends ACBC.Component
   {
     if (!this.Awake) return;
 
-    this.Tx.PosX += this.VelX * dt;
+    if (this.VelX === 0 && this.VelY === 0)
+    {
+      this.SleepTimer += dt;
+
+      if (this.SleepTimer >= ACBC.Body.SleepTimeout)
+        this.Sleep();
+    }
+
+    let posX = this.Tx.PosX;
+    let posY = this.Tx.PosY;
+
+    posX += this.VelX * dt;
 
     let halfDt = dt / 2;
-    this.Tx.PosY += this.VelY * halfDt;
+    posY += this.VelY * halfDt;
     this.VelY += this.Gravity * dt;
-    this.Tx.PosY += this.VelY * halfDt;
+    posY += this.VelY * halfDt;
+
+    this.Tx.PosX = ACBC.Clamp(posX, ACBC.Body.PosXMin, ACBC.Body.PosXMax);
+    this.Tx.PosY = ACBC.Clamp(posY, ACBC.Body.PosYMin, ACBC.Body.PosYMax);
+  }
+
+  Sleep()
+  {
+    this.Awake = false;
+    this.SleepTimer = 0;
+  }
+
+  Wake()
+  {
+    this.Awake = true;
+    this.SleepTimer = 0;
+  }
+
+  SetVelX(value)
+  {
+    if (value === this.VelX) return;
+
+    this.VelX = value;
+    this.Wake();
+  }
+
+  SetVelY(value)
+  {
+    if (value === this.VelY) return;
+
+    this.VelY = value;
+    this.Wake();
   }
 
   Reset()
@@ -72,6 +125,7 @@ ACBC.Body = class Body extends ACBC.Component
     this.VelY = 0;
     this.Gravity = 100;
     this.Awake = false;
+    this.SleepTimer = 0;
   }
 };
 

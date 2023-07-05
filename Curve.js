@@ -63,6 +63,8 @@ ACBC.Curve = class Curve
     return y3(t);
   }
 
+  /** @todo Consider researching and adding an ElasticPulse */
+
   static Quad = class Quad
   {
     static In(t) { return t * t; }

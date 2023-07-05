@@ -15,6 +15,45 @@ if (!window.ACBC)
 }
 
 
+ACBC.Random = function(min, max)
+{
+  return (max - min) * Math.random() + min;
+}
+
+
+ACBC.RandomVariance = function(base, variance)
+{
+  return base + variance * (2 * Math.random() - 1);
+}
+
+
+/** @todo Test this */
+ACBC.RandomInt = function(min, max)
+{
+  min = Math.round(min);
+  max = Math.round(max) + 1;
+
+  return Math.round(ACBC.Random(min, max));
+}
+
+
+/** @todo Test this */
+ACBC.RandomIntVariance = function(base, variance)
+{
+  base = Math.round(base);
+  variance = Math.round(variance);
+
+  return base + Math.round(variance * (3 * Math.random() - 1));
+}
+
+
+/** @todo Test this */
+ACBC.DieRoll = function(s)
+{
+  return ACBC.RandomInt(1, s);
+}
+
+
 /**
  * Clamps `n` to be between `min` and `max`
  * @param {number} n 
