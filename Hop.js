@@ -132,7 +132,7 @@ ACBC.Hop = class Hop extends ACBC.Component
       duration, new ACBC.Curve(ACBC.Curve.Pulse, 2), true);
     grp.Property(this.Owner.Tx, "ScaleY", squishScaleY,
       duration, new ACBC.Curve(ACBC.Curve.Pulse, 2), true);
-    seq.Call(this.BeginRising);
+    seq.Call(this.BeginRising.bind(this));
   }
 
   BeginRising()
@@ -170,7 +170,7 @@ ACBC.Hop = class Hop extends ACBC.Component
       duration, new ACBC.Curve(ACBC.Curve.Pulse, 2), true);
     grp.Property(this.Owner.Tx, "ScaleY", squishScaleY,
       duration, new ACBC.Curve(ACBC.Curve.Pulse, 2), true);
-    seq.Call(this.EndHopping);
+    seq.Call(this.EndHopping.bind(this));
   }
 
   EndHopping()

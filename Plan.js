@@ -286,7 +286,7 @@ ACBC.PlanCall = class PlanCall extends ACBC.Plan
 
   /**
    * @param {PlanCallback} callback
-   * The function to call
+   * The function to call. ***`Remember to use proper binding!`***
    * @param {boolean} live
    * Whether the arguments should be cached as they are when the action is
    * created (false) or read at the moment the callback is finally called (true)
