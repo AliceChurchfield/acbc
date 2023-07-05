@@ -85,6 +85,7 @@ ACBC.PlanSet = class PlanSet extends ACBC.Plan
 
   constructor()
   {
+    super();
     this.Name = "Set";
   }
 
