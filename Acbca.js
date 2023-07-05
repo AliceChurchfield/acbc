@@ -16,18 +16,49 @@ if (!window.ACBC)
 }
 
 
+/** @abstract */
+ACBC.EventData = class EventData
+{
+  Handled;
+
+  constructor()
+  {
+    this.Handled = false;
+  }
+};
+/**
+ * @callback EventHandler
+ * @param {ACBC.EventData} eventData
+ * @returns {void}
+ */
+
+
+ACBC.UpdateEvent = class UpdateEvent extends ACBC.EventData
+{
+  /** @type {number} */
+  Dt;
+
+  /**
+   * @param {number} dt 
+   */
+  constructor(dt)
+  {
+    super();
+    this.Dt = dt;
+  }
+};
+
+
 ACBC.Acbca = class Acbca
 {
   /** @type {Character} */
   C;
   /** @type {ACBC.Component[]} */
   Components = [];
-  /** @type {ACBC.Component[]} */
-  PhysicsUpdaters = [];
-  /** @type {ACBC.Component[]} */
-  LateUpdaters = [];
   /** @type {ACBC.PlanGroup} */
   Plans;
+  /** @type {Map<string, EventHandler[]>} */
+  EventConnections = new Map;
 
   /**
    * @param {Character} c 
@@ -39,6 +70,8 @@ ACBC.Acbca = class Acbca
     this.Plans = new ACBC.PlanGroup();
   }
 
+  get Name() { return CharacterNickname(this.C); }
+
   /**
    * @param {typeof ACBC.Component} componentClass 
    * @param  {...any} args 
@@ -49,10 +82,6 @@ ACBC.Acbca = class Acbca
     let component = new componentClass(this, ...args);
     this[componentClass.name] = component;
     this.Components.push(component);
-    if (typeof component.PhysicsUpdate === "function")
-      this.PhysicsUpdaters.push(component);
-    if (typeof component.LateUpdate === "function")
-      this.LateUpdaters.push(component);
     return component;
   }
 
@@ -63,19 +92,74 @@ ACBC.Acbca = class Acbca
   }
 
   /**
-   * @param {number} dt 
+   * @param {UpdateEvent} updateEvent 
    */
-  Update(dt)
+  Update(updateEvent)
   {
-    for (const component of this.Components)
-      component.Update(dt);
-    for (const component of this.PhysicsUpdaters)
-      component.PhysicsUpdate(dt);
+    this.Dispatch(ACBC.Events.MainUpdate, updateEvent);
+    this.Dispatch(ACBC.Events.PhysicsUpdate, updateEvent);
       
-    this.Plans.Update(dt);
+    this.Plans.Update(updateEvent);
+  }
 
-    for (const component of this.LateUpdaters)
-      component.LateUpdate(dt);
+  /**
+   * @param {string} eventName 
+   * @param {EventHandler} handler ***`Remember to use proper binding!`***
+   * @returns {void}
+   */
+  Connect(eventName, handler)
+  {
+    let handlers = this.EventConnections.get(eventName);
+
+    if (handlers)
+      handlers.push(handler);
+    else
+      this.EventConnections.set(eventName, [handler]);
+  }
+
+  /**
+   * @param {string} eventName 
+   * @param {EventHandler} handler ***`Remember to use proper binding!`***
+   * @returns {void}
+   */
+  Disconnect(eventName, handler)
+  {
+    let handlers = this.EventConnections.get(eventName);
+
+    if (!handlers)
+    {
+      /** @todo Full error reporting */
+      let connectionStr = `${handler.name} from ${eventName} on ${this.Name}`;
+      let err = `Tried to disconnect ${connectionStr}, ` +
+        `but that event couldn't be found.`;
+      console.error(err);
+      return;
+    }
+
+    let handlerIndex = handlers.indexOf(handler); 
+    
+    if (handlerIndex < 0)
+    {
+      /** @todo Full error reporting */
+      let connectionStr = `${handler.name} from ${eventName} on ${this.Name}`;
+      let err = `Tried to disconnect ${connectionStr}, ` +
+        `but that handler couldn't be found.`;
+      console.error(err);
+      return;
+    }
+
+    handlers.splice(handlerIndex, 1);
+  }
+
+  /**
+   * @param {string} eventName 
+   * @param {ACBC.EventData} eventData 
+   */
+  Dispatch(eventName, eventData)
+  {
+    let handlers = this.EventConnections.get(eventName);
+    for (const handler of handlers)
+      handler(eventData);
   }
 };
 
@@ -109,8 +193,10 @@ ACBC.CharacterSetup = function(C)
  */
 ACBC.CharacterUpdate = function(dt)
 {
+  let updateEvent = new ACBC.UpdateEvent(dt);
+
   for (const character of ACBC.Characters)
-    character.Acbca.Update(dt);
+    character.Acbca.Update(updateEvent);
 };
 
 

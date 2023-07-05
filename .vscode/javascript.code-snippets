@@ -60,4 +60,13 @@
 			"};",
 		],
 	},
+	"New enum entry":
+	{
+		"description": "Adds a new string enum entry to an enum",
+		"prefix": "enum",
+		"body":
+		[
+			"${1:EnumEntry}: \"${1:EnumEntry}\",$0",
+		],
+	},
 }

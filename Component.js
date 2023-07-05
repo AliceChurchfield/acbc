@@ -34,13 +34,14 @@ ACBC.Component = class Component
   Initialize() {}
   /**
    * @virtual
-   * @param {number} _dt 
-   */
-  Update(_dt) {}
-  /**
-   * @virtual
    */
   Reset() {}
+
+  /**
+   * @todo
+   * Maybe come up with a way to break all event connections automatically when
+   * this component is destroyed
+   */
 };
 
 

@@ -15,6 +15,16 @@ if (!window.ACBC)
 }
 
 
+ACBC.BodyEvent = class BodyEvent extends ACBC.EventData
+{
+  /**
+   * @todo
+   * Maybe fill in here the landing velocity, the penetration depth ( ͡° ͜ʖ ͡°),
+   * etc.
+   */
+};
+
+
 ACBC.Body = class Body extends ACBC.Component
 {
   static PosXMin = -1000;
@@ -40,9 +50,19 @@ ACBC.Body = class Body extends ACBC.Component
   VelY;
   /**
    * @type {number}
-   * Gravity in units / s^2. Applied to VelY every frame in PhysicsUpdate
+   * Gravity in units / s^2. Applied to VelY in PhysicsUpdate if not grounded
    */
   Gravity;
+  /**
+   * @type {boolean}
+   * Whether this body should be pulled by gravity
+   */
+  Grounded;
+  /**
+   * @type {number}
+   * The Y position at which this body is considered on the ground
+   */
+  GroundY;
   /**
    * @type {boolean}
    * Whether physics should move this body around
@@ -63,11 +83,19 @@ ACBC.Body = class Body extends ACBC.Component
   Initialize()
   {
     this.Tx = this.Owner.Tx;
+    this.Owner.Connect(ACBC.Events.PhysicsUpdate,
+      this.OnPhysicsUpdate.bind(this));
   }
 
-  PhysicsUpdate(dt)
+  /**
+   * @param {ACBC.UpdateEvent} updateEvent 
+   * @returns {void}
+   */
+  OnPhysicsUpdate(updateEvent)
   {
     if (!this.Awake) return;
+
+    let dt = updateEvent.Dt;
 
     if (this.VelX === 0 && this.VelY === 0)
     {
@@ -84,17 +112,52 @@ ACBC.Body = class Body extends ACBC.Component
 
     let halfDt = dt / 2;
     posY += this.VelY * halfDt;
-    this.VelY += this.Gravity * dt;
+
+    let newGrounded = posY >= this.GroundY;
+    if (!newGrounded)
+      this.VelY += this.Gravity * dt;
+    
     posY += this.VelY * halfDt;
 
     this.Tx.PosX = ACBC.Clamp(posX, ACBC.Body.PosXMin, ACBC.Body.PosXMax);
     this.Tx.PosY = ACBC.Clamp(posY, ACBC.Body.PosYMin, ACBC.Body.PosYMax);
+
+    if (newGrounded !== this.Grounded)
+    {
+      this.Grounded = newGrounded;
+
+      if (newGrounded)
+        this.Land();
+      else
+        this.LeaveGround();
+    }
+  }
+
+  LeaveGround()
+  {
+    let bodyEvent = new ACBC.BodyEvent();
+    this.Owner.Dispatch("LeftGround", bodyEvent);
+  }
+
+  Land()
+  {
+    this.Tx.PosY = this.GroundY;
+    this.VelY = 0;
+
+    let bodyEvent = new ACBC.BodyEvent();
+    this.Owner.Dispatch("Landed", bodyEvent);
   }
 
   Sleep()
   {
     this.Awake = false;
     this.SleepTimer = 0;
+  }
+
+  Stop()
+  {
+    this.VelX = this.VelY = 0;
+    this.Sleep();
   }
 
   Wake()
@@ -124,6 +187,7 @@ ACBC.Body = class Body extends ACBC.Component
     this.VelX = 0;
     this.VelY = 0;
     this.Gravity = 100;
+    this.Grounded = true;
     this.Awake = false;
     this.SleepTimer = 0;
   }

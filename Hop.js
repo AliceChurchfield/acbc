@@ -49,10 +49,6 @@ ACBC.Hop = class Hop extends ACBC.Component
 
   /** @type {boolean} */
   Hopping;
-  /** @type {boolean} */
-  Grounded;
-  /** @type {number?} */
-  GroundY;
   /** @type {number} */
   HopsRemaining;
   /** @type {number} */
@@ -68,10 +64,22 @@ ACBC.Hop = class Hop extends ACBC.Component
 
   get CurrentEnergy() { return ACBC.Hop.ComputeEnergy(this.CurrentHopSpeed); }
 
-  LateUpdate()
+  Initialize()
   {
-    if (!this.Grounded && this.Owner.Tx.PosY >= this.GroundY)
-      this.Land();
+    this.Owner.Connect(ACBC.Events.Landed, this.OnLanded.bind(this));
+  }
+
+  /**
+   * @param {ACBC.BodyEvent} _bodyEvent 
+   */
+  OnLanded(_bodyEvent)
+  {
+    --this.HopsRemaining;
+
+    if (this.HopsRemaining > 0)
+      this.PreSquish();
+    else
+      this.PostSquish();
   }
 
   /**
@@ -107,14 +115,13 @@ ACBC.Hop = class Hop extends ACBC.Component
     return this.Squishiness * energy / ACBC.Hop.MaxHopEnergy;
   }
 
-  Hop(count = 1)
+  BeginHopping(count = 1)
   {
     this.CurrentChainSize = this.HopsRemaining = count;
 
     if (this.Hopping) return;
 
     this.Hopping = true;
-    this.GroundY = this.Owner.Tx.PosY;
     this.PreSquish();
   }
 
@@ -137,24 +144,7 @@ ACBC.Hop = class Hop extends ACBC.Component
 
   BeginRising()
   {
-    this.Grounded = false;
-    this.Owner.Body.SetVelY(this.CurrentHopSpeed);
-  }
-
-  Land()
-  {
-    this.Owner.Body.SetVelY(0);
-    this.Grounded = true;
-    --this.HopsRemaining;
-
-    if (this.HopsRemaining > 0)
-    {
-      this.PreSquish();
-    }
-    else
-    {
-      this.PostSquish();
-    }
+    this.Owner.Body.SetVelY(-this.CurrentHopSpeed);
   }
 
   PostSquish()
@@ -184,8 +174,6 @@ ACBC.Hop = class Hop extends ACBC.Component
     this.SquishDurationScale = 3;
 
     this.Hopping = false;
-    this.Grounded = true;
-    this.GroundY = null;
     this.HopsRemaining = 0;
     this.CurrentChainSize = 0;
   }
