@@ -91,15 +91,21 @@ ACBC.Acbca = class Acbca
       component.Initialize();
   }
 
+  Reset()
+  {
+    for (const component of this.Components)
+      component.Reset();
+  }
+
   /**
-   * @param {UpdateEvent} updateEvent 
+   * @param {ACBC.UpdateEvent} updateEvent 
    */
   Update(updateEvent)
   {
     this.Dispatch(ACBC.Events.MainUpdate, updateEvent);
     this.Dispatch(ACBC.Events.PhysicsUpdate, updateEvent);
       
-    this.Plans.Update(updateEvent);
+    this.Plans.Update(updateEvent.Dt);
   }
 
   /**
@@ -160,7 +166,7 @@ ACBC.Acbca = class Acbca
     let handlers = this.EventConnections.get(eventName);
 
     if (!handlers) return;
-    
+
     for (const handler of handlers)
       handler(eventData);
   }
