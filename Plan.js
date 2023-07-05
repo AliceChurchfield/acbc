@@ -215,7 +215,11 @@ ACBC.PlanSet = class PlanSet extends ACBC.Plan
 /** @extends ACBC.PlanSet */
 ACBC.PlanGroup = class PlanGroup extends ACBC.PlanSet
 {
-  constructor() { this.Name = "Group"; }
+  constructor()
+  {
+    super();
+    this.Name = "Group";
+  }
   /** @override */
   Update(dt) { return this.ProcessPlans(dt, false); }
 };
@@ -223,7 +227,11 @@ ACBC.PlanGroup = class PlanGroup extends ACBC.PlanSet
 /** @extends ACBC.PlanSet */
 ACBC.PlanSequence = class PlanSequence extends ACBC.PlanSet
 {
-  constructor() { this.Name = "Sequence"; }
+  constructor()
+  {
+    super();
+    this.Name = "Sequence";
+  }
   /** @override */
   Update(dt) { return this.ProcessPlans(dt, true); }
 };
