@@ -18,19 +18,50 @@ if (!window.ACBC)
 ACBC.Tx = class Tx extends ACBC.Component
 {
   /** @todo Come up with a better way to have default values for classes */
-  OriginX;  // How far across the character is the pivot point
-  OriginY;  // How far down the character is the pivot point
-  PosX;     // Relative to wherever vanilla BC would otherwise put you
-  PosY;     // Relative to wherever vanilla BC would otherwise put you
-  ScaleX;   // Relative to whatever scale you'd otherwise have
-  ScaleY;   // Relative to whatever scale you'd otherwise have
+  /**
+   * @type {number}
+   * How far across the character is the pivot point
+   */
+  OriginX;
+  /**
+   * @type {number}
+   * How far down the character is the pivot point
+   */
+  OriginY;
+  /**
+   * @type {number}
+   * H position relative to wherever you'd otherwise be. Positive is right
+   */
+  PosX;
+  /**
+   * @type {number}
+   * V position relative to wherever you'd otherwise be. Positive is down
+   */
+  PosY;
+  /**
+   * @type {number}
+   * Width relative to whatever scale you'd otherwise have
+   */
+  ScaleX;
+  /**
+   * @type {number}
+   * Height relative to whatever scale you'd otherwise have
+   */
+  ScaleY;
 
+  /**
+   * @param {ACBC.Acbca} owner 
+   */
   constructor(owner)
   {
     super(owner);
     this.Reset();
   }
 
+  /**
+   * Returns whether this Tx has changed at all from its defaults
+   * @returns {boolean}
+   */
   IsActive()
   {
     /** @todo Maybe make this compare these properties to the defaults? */

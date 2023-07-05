@@ -30,9 +30,17 @@ ACBC.Component = class Component
 
   /**
    * @virtual
+   */
+  Initialize() {}
+  /**
+   * @virtual
    * @param {number} _dt 
    */
   Update(_dt) {}
+  /**
+   * @virtual
+   */
+  Reset() {}
 };
 
 

@@ -15,6 +15,12 @@ if (!window.ACBC)
 }
 
 
+ACBC.Hop = class Hop extends ACBC.Component
+{
+  
+};
+
+
 ACBC.Hopping = false;
 ACBC.VelX = 0;
 ACBC.VelY = 0;

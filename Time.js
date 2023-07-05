@@ -15,6 +15,8 @@ if (!window.ACBC)
 }
 
 
+ACBC.FixedDt = 1 / 60;
+ACBC.UseFixedDt = true;
 /**
  * Returns the amount of time, in seconds, that has elapsed since the previous
  * frame.
@@ -22,7 +24,7 @@ if (!window.ACBC)
  */
 ACBC.Dt = function()
 {
-  return TimerRunInterval / 1000;
+  return ACBC.UseFixedDt ? ACBC.FixedDt : TimerRunInterval / 1000;
 };
 
 

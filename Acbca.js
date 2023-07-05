@@ -22,6 +22,10 @@ ACBC.Acbca = class Acbca
   C;
   /** @type {ACBC.Component[]} */
   Components = [];
+  /** @type {ACBC.Component[]} */
+  PhysicsUpdaters = [];
+  /** @type {ACBC.Component[]} */
+  LateUpdaters = [];
   /** @type {ACBC.PlanGroup} */
   Plans;
 
@@ -45,7 +49,17 @@ ACBC.Acbca = class Acbca
     let component = new componentClass(this, ...args);
     this[componentClass.name] = component;
     this.Components.push(component);
+    if (typeof component.PhysicsUpdate === "function")
+      this.PhysicsUpdaters.push(component);
+    if (typeof component.LateUpdate === "function")
+      this.LateUpdaters.push(component);
     return component;
+  }
+
+  Initialize()
+  {
+    for (const component of this.Components)
+      component.Initialize();
   }
 
   /**
@@ -55,7 +69,11 @@ ACBC.Acbca = class Acbca
   {
     for (const component of this.Components)
       component.Update(dt);
-    
+    for (const component of physicsUpdaters)
+      component.PhysicsUpdate(dt);
+    for (const component of lateUpdaters)
+      component.LateUpdate(dt);
+      
     this.Plans.Update(dt);
   }
 };
@@ -75,6 +93,8 @@ ACBC.CharacterSetup = function(C)
 
   let acbca = new ACBC.Acbca(C);
   acbca.Add(ACBC.Tx);
+  acbca.Add(ACBC.Body);
+  acbca.Add(ACBC.Hop);
 
   ACBC.Characters.push(C);
 

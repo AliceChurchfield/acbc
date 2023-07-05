@@ -11,7 +11,7 @@
 const ACBC_VERSION = "0.0.4";
 console.log(`Loading ACBC version ${ACBC_VERSION}...`);
 
-(() =>
+(async () =>
 {
 // Bondage Club Mod Development Kit (1.1.0)
 // For more info see: https://github.com/Jomshir98/bondage-club-mod-sdk
@@ -31,33 +31,66 @@ if (!window.ACBC) window.ACBC =
   Private: {},
   LoadingElementCount: 0,
   IsLoadingComplete: function() { return ACBC.LoadingElementCount <= 0; },
+  ModApi: MOD_API,
 };
 
-ACBC.ModApi = MOD_API;
+let urlsToLoad = [];
+let nextScriptIndex = 0;
 
-function AddScript(src)
+function BeginLoading()
 {
-  ++ACBC.LoadingElementCount;
+  LoadNextScript();
+}
+
+function LoadNextScript()
+{
+  if (nextScriptIndex >= urlsToLoad.length) return;
+
+  const url = urlsToLoad[nextScriptIndex];
   const script = document.createElement("script");
   script.setAttribute("crossorigin", "anonymous");
-  script.setAttribute("src", src);
+  script.setAttribute("src", url);
   script.addEventListener("load", (e) =>
   {
     --ACBC.LoadingElementCount;
     script.remove();
+    LoadNextScript();
   });
   document.head.appendChild(script);
+
+  ++nextScriptIndex;
 }
 
-function AddAcbcScript(src)
+function AddScript(url)
 {
-  AddScript(`https://alicechurchfield.github.io/acbc/${src}`);
+  urlsToLoad.push(url);
+  ++ACBC.LoadingElementCount;
+}
+
+function AddAcbcScript(filename)
+{
+  AddScript(`https://alicechurchfield.github.io/acbc/${filename}`);
 }
 
 AddAcbcScript("acbc-main.js");
 AddAcbcScript("acbc-util.js");
-AddAcbcScript("WearItem.js");
+
+AddAcbcScript("Time.js");
+AddAcbcScript("Math.js");
+AddAcbcScript("Color.js");
+AddAcbcScript("Curve.js");
+AddAcbcScript("Plan.js");
+
+AddAcbcScript("Component.js");
+AddAcbcScript("Transform.js");
+AddAcbcScript("Body.js");
+AddAcbcScript("Hop.js");
+AddAcbcScript("Wiggle.js");
+AddAcbcScript("Acbca.js");
+AddAcbcScript("Assets.js");
+
 AddAcbcScript("WhatSheLikes.js");
+AddAcbcScript("WearItem.js");
 AddAcbcScript("KidnapFix.js");
 AddAcbcScript("KidnapLeagueFix.js");
 AddAcbcScript("MagicFix.js");
@@ -68,18 +101,8 @@ AddAcbcScript("GamblingPatch.js");
 AddAcbcScript("KidnapPatch.js");
 AddAcbcScript("KidnapLeaguePatch.js");
 AddAcbcScript("MagicPatch.js");
-AddAcbcScript("Wiggle.js");
-AddAcbcScript("Hop.js");
-AddAcbcScript("Time.js");
-AddAcbcScript("Math.js");
-AddAcbcScript("Color.js");
-AddAcbcScript("Curve.js");
-AddAcbcScript("Plan.js");
-AddAcbcScript("Assets.js");
 
-AddAcbcScript("Component.js");
-AddAcbcScript("Transform.js");
-AddAcbcScript("Acbca.js");
+BeginLoading();
 
 })();
 
