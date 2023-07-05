@@ -96,6 +96,7 @@ ACBC.CharacterSetup = function(C)
   acbca.Add(ACBC.Tx);
   acbca.Add(ACBC.Body);
   acbca.Add(ACBC.Hop);
+  acbca.Initialize();
 
   ACBC.Characters.push(C);
 
