@@ -25,12 +25,26 @@ ACBC.Plan = class Plan
     Completed: "Completed",
   };
 
-  Name = "Base Plan";
-  Started = false;
-  Completed = false;
-  Active = true;
-  Duration = -1;
-  Remaining = -1;
+  /** @type {string} */
+  Name;
+  /** @type {boolean} */
+  Started;
+  /** @type {boolean} */
+  Completed;
+  /** @type {boolean} */
+  Active;
+  /** @type {number} */
+  Duration;
+  /** @type {number} */
+  Remaining;
+
+  constructor()
+  {
+    this.Name = "Base Plan";
+    this.Started = false;
+    this.Completed = false;
+    this.Active = true;
+  }
 
   get Completion()
   {
@@ -40,10 +54,10 @@ ACBC.Plan = class Plan
   /**
    * Updates the plan, nudging it one step closer to completion
    * @virtual
-   * @param {number} dt - Delta time in seconds
+   * @param {number} _dt - Delta time in seconds
    * @returns {ACBC.Plan.State} - The state of the plan following the update
    */
-  Update(dt) { return ACBC.Plan.State.Completed; }
+  Update(_dt) { return ACBC.Plan.State.Completed; }
   /**
    * A chance for a plan to do something just before it's canceled
    * @virtual
@@ -66,9 +80,14 @@ ACBC.Plan = class Plan
 /** @abstract */
 ACBC.PlanSet = class PlanSet extends ACBC.Plan
 {
-  Name = "Set";
   /** @type {ACBC.Plan[]} */
   Plans = [];
+
+  constructor()
+  {
+    this.Name = "Set";
+  }
+
   get Count() { return this.Plans.length; }
   get Empty() { return this.Plans.length === 0; }
 
@@ -196,7 +215,7 @@ ACBC.PlanSet = class PlanSet extends ACBC.Plan
 /** @extends ACBC.PlanSet */
 ACBC.PlanGroup = class PlanGroup extends ACBC.PlanSet
 {
-  Name = "Group";
+  constructor() { this.Name = "Group"; }
   /** @override */
   Update(dt) { return this.ProcessPlans(dt, false); }
 };
@@ -204,7 +223,7 @@ ACBC.PlanGroup = class PlanGroup extends ACBC.PlanSet
 /** @extends ACBC.PlanSet */
 ACBC.PlanSequence = class PlanSequence extends ACBC.PlanSet
 {
-  Name = "Sequence";
+  constructor() { this.Name = "Sequence"; }
   /** @override */
   Update(dt) { return this.ProcessPlans(dt, true); }
 };
@@ -212,7 +231,6 @@ ACBC.PlanSequence = class PlanSequence extends ACBC.PlanSet
 /** @extends ACBC.Plan */
 ACBC.PlanDelay = class PlanDelay extends ACBC.Plan
 {
-  Name = "Delay";
   /**
    * @param {number} duration
    * How long to wait before moving on to the next plan in the set
@@ -220,6 +238,7 @@ ACBC.PlanDelay = class PlanDelay extends ACBC.Plan
   constructor(duration)
   {
     super();
+    this.Name = "Delay";
     this.Remaining = this.Duration = duration;
   }
 
@@ -249,10 +268,10 @@ ACBC.PlanDelay = class PlanDelay extends ACBC.Plan
 /** @extends ACBC.Plan */
 ACBC.PlanCall = class PlanCall extends ACBC.Plan
 {
-  Name = "Call";
   /** @type {PlanCallback} */
-  Callback = null;
-  Live = false;
+  Callback;
+  /** @type {boolean} */
+  Live;
   /** @type {any[] | LiveArg[]} */
   Args = [];
 
@@ -268,15 +287,16 @@ ACBC.PlanCall = class PlanCall extends ACBC.Plan
   constructor(callback, live = false, ...args)
   {
     super();
+    this.Name = "Call";
     this.Callback = callback;
     this.Live = live;
     this.Args = args;
   }
 
-  Update(dt)
+  Update(_dt)
   {
-    Started = true;
-    Remaining = 0;
+    this.Started = true;
+    this.Remaining = 0;
 
     if (this.Live)
       this.Args = this.Args.map(a => a.Object[a.Key]);
@@ -291,7 +311,6 @@ ACBC.PlanCall = class PlanCall extends ACBC.Plan
 /** @extends ACBC.Plan */
 ACBC.PlanProperty = class PlanProperty extends ACBC.Plan
 {
-  Name = "Property";
   /** @type {object} */
   Target;
   /** @type {string} */
@@ -324,6 +343,7 @@ ACBC.PlanProperty = class PlanProperty extends ACBC.Plan
     curve = new ACBC.Curve, cycling = false, postSetter = null, ...args)
   {
     super();
+    this.Name = "Property";
     this.Target = target;
     this.PropertyName = propertyName;
     this.End = end;
