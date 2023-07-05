@@ -81,12 +81,13 @@ AddAcbcScript("Color.js");
 AddAcbcScript("Curve.js");
 AddAcbcScript("Plan.js");
 
+AddAcbcScript("Events.js");
+AddAcbcScript("Acbca.js");
 AddAcbcScript("Component.js");
 AddAcbcScript("Transform.js");
 AddAcbcScript("Body.js");
 AddAcbcScript("Hop.js");
 AddAcbcScript("Wiggle.js");
-AddAcbcScript("Acbca.js");
 AddAcbcScript("Assets.js");
 
 AddAcbcScript("WhatSheLikes.js");
