@@ -21,6 +21,7 @@ ACBC.Hop = class Hop extends ACBC.Component
   static HopArea = new ACBC.Range(-50, 50);
   static SquishAspectRatio = 2; // X / Y
   static PostSquishFactor = 1;
+  static ExitDuration = 20;
   static get MaxHopEnergy()
   { return ACBC.Hop.ComputeEnergy(ACBC.Hop.SpeedYRange.Max); }
   
@@ -47,16 +48,22 @@ ACBC.Hop = class Hop extends ACBC.Component
 
   /** @type {boolean} */
   Hopping;
+  /** @type {boolean} */
+  HoppingTowardExit;
   /** @type {number} */
   HopsRemaining;
   /** @type {number} */
   CurrentChainSize;
   /** @type {number} */
   CurrentVelY;
+  /** @type {number} */
+  HopDestinationX;
   /** @type {ACBC.Tx} */
   Tx;
   /** @type {ACBC.Body} */
   Body;
+
+  ExitHops = [];
 
   constructor(owner)
   {
@@ -65,7 +72,9 @@ ACBC.Hop = class Hop extends ACBC.Component
   }
 
   get CurrentEnergy() { return ACBC.Hop.ComputeEnergy(this.CurrentVelY); }
-  get CurrentHopDuration() { return -2 * this.CurrentVelY / this.Body.Gravity; }
+  get CurrentHopDuration() { return this.ComputeHopDuration(this.CurrentVelY); }
+  get HopDurationRange()
+  { return ACBC.Hop.SpeedYRange.Apply(this.ComputeHopDuration, this); }
 
   Initialize()
   {
@@ -92,7 +101,7 @@ ACBC.Hop = class Hop extends ACBC.Component
    * variance and where we are in the current hop chain
    * @returns {void}
    */
-  ComputeVelY()
+  NextVelY()
   {
     // let hopDelta = this.CurrentChainSize - this.HopsRemaining;
     // if (hopDelta > 0)
@@ -117,9 +126,28 @@ ACBC.Hop = class Hop extends ACBC.Component
     return this.Squishiness * energy / ACBC.Hop.MaxHopEnergy;
   }
 
+  /**
+   * @param {number} velY 
+   * @returns {number}
+   */
+  ComputeHopDuration(velY)
+  {
+    return -2 * velY / this.Body.Gravity;
+  }
+
+  ComputeHopCountRangeForDuration(duration)
+  {
+    let range = this.HopDurationRange;
+    let min = ACBC.Hop.ExitDuration / range.Max;
+    let max = ACBC.Hop.ExitDuration / range.Min;
+
+    return new ACBC.Range(Math.floor(min), Math.floor(max));
+  }
+
   BeginHopping(count = 1)
   {
     this.CurrentChainSize = this.HopsRemaining = count;
+    this.HoppingTowardExit = false;
 
     if (this.Hopping) return;
 
@@ -129,18 +157,17 @@ ACBC.Hop = class Hop extends ACBC.Component
 
   PreSquish()
   {
-    this.ComputeVelY();
+    this.NextVelY();
 
     let squishFactor = this.ComputeSquish(this.CurrentEnergy);
     let squishScaleX = 1 + squishFactor;
     let squishScaleY = 1 - squishFactor / ACBC.Hop.SquishAspectRatio;
     let duration = this.SquishDurationScale * squishFactor;
+    let curve = ACBC.Curve.Pulse(2);
     let seq = this.Owner.Plans.Sequence();
     let grp = seq.Group();
-    grp.Property(this.Tx, "ScaleX", squishScaleX,
-      duration, new ACBC.Curve(ACBC.Curve.Pulse, 2), true);
-    grp.Property(this.Tx, "ScaleY", squishScaleY,
-      duration, new ACBC.Curve(ACBC.Curve.Pulse, 2), true);
+    grp.Property(this.Tx, "ScaleX", squishScaleX, duration, curve, true);
+    grp.Property(this.Tx, "ScaleY", squishScaleY, duration, curve, true);
     seq.Call(this.BeginRising.bind(this));
   }
 
@@ -150,8 +177,8 @@ ACBC.Hop = class Hop extends ACBC.Component
     // Otherwise, pick a point at random within the hop area and hop to it
     let end = this.HopsRemaining > 1 ? ACBC.Hop.HopArea.Random() : 0;
     let duration = this.CurrentHopDuration;
-    this.Owner.Plans.Property(this.Tx, "PosX", end, duration,
-      new ACBC.Curve(ACBC.Curve.Linear));
+    let curve = ACBC.Curve.Linear;
+    this.Owner.Plans.Property(this.Tx, "PosX", end, duration, curve);
     this.Body.SetVelY(this.CurrentVelY);
   }
 
@@ -162,18 +189,25 @@ ACBC.Hop = class Hop extends ACBC.Component
     let squishScaleX = 1 + squishFactor;
     let squishScaleY = 1 - squishFactor / ACBC.Hop.SquishAspectRatio;
     let duration = this.SquishDurationScale * squishFactor;
+    let curve = ACBC.Curve.Pulse(2);
     let seq = this.Owner.Plans.Sequence();
     let grp = seq.Group();
-    grp.Property(this.Tx, "ScaleX", squishScaleX,
-      duration, new ACBC.Curve(ACBC.Curve.Pulse, 2), true);
-    grp.Property(this.Tx, "ScaleY", squishScaleY,
-      duration, new ACBC.Curve(ACBC.Curve.Pulse, 2), true);
+    grp.Property(this.Tx, "ScaleX", squishScaleX, duration, curve, true);
+    grp.Property(this.Tx, "ScaleY", squishScaleY, duration, curve, true);
     seq.Call(this.EndHopping.bind(this));
   }
 
   EndHopping()
   {
     this.Hopping = false;
+  }
+
+  BeginHoppingTowardExit()
+  {
+    /**
+     * @todo
+     * Rewrite this whole system with Plan-based Y movement :|
+     */
   }
 
   Reset()

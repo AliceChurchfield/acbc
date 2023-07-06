@@ -205,7 +205,7 @@ ACBC.PlanSet = class PlanSet extends ACBC.Plan
    * @returns {ACBC.PlanSet} This set (for chaining)
    */
   Property(target, propertyName, end, duration,
-    curve = new ACBC.Curve, cycling = false, postSetter = null, ...args)
+    curve = ACBC.Curve.Quad.InOut, cycling = false, postSetter = null, ...args)
   {
     this.Add(new ACBC.PlanProperty(target, propertyName, end, duration,
       curve, cycling, postSetter, ...args));
@@ -349,7 +349,7 @@ ACBC.PlanProperty = class PlanProperty extends ACBC.Plan
    * @param {...*} args
    */
   constructor(target, propertyName, end, duration,
-    curve = new ACBC.Curve, cycling = false, postSetter = null, ...args)
+    curve = ACBC.Curve.Quad.InOut, cycling = false, postSetter = null, ...args)
   {
     super();
     this.Name = "Property";

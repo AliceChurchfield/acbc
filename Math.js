@@ -35,6 +35,19 @@ ACBC.Range = class Range
   get Span() { return this.Max - this.Min; }
 
   Random() { return ACBC.Random(this.Min, this.Max); }
+  RandomInt() { return ACBC.RandomInt(this.Min, this.Max); }
+
+  /**
+   * @param {function(number): number} func 
+   * @param {object} thisArg 
+   * @returns {ACBC.Range}
+   */
+  Apply(func, thisArg)
+  {
+    if (thisArg)
+      func = func.bind(thisArg);
+    return new ACBC.Range(func(this.Min), func(this.Max));
+  }
 };
 
 
@@ -48,6 +61,7 @@ ACBC.Random = function(min, max)
 {
   return (max - min) * Math.random() + min;
 }
+
 
 /**
  * Generates a random floating-point value within the range
@@ -63,6 +77,12 @@ ACBC.RandomVariance = function(base, variance)
 
 
 /** @todo Test this */
+/**
+ * Generates a random integer value within the range [`min`, `max`]
+ * @param {number} min The lower bound
+ * @param {number} max The upper bound
+ * @returns {number} The random value
+ */
 ACBC.RandomInt = function(min, max)
 {
   min = Math.round(min);
