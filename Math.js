@@ -15,6 +15,28 @@ if (!window.ACBC)
 }
 
 
+ACBC.Range = class Range
+{
+  /** @member {number} */
+  Min;
+  /** @member {number} */
+  Max;
+  
+  /**
+   * @param {number} min 
+   * @param {number} max 
+   */
+  constructor(min, max)
+  {
+    this.Min = min;
+    this.Max = max;
+  }
+
+  get Span() { return this.Max - this.Min; }
+  get Random() { return ACBC.Random(this.Min, this.Max); }
+};
+
+
 ACBC.Random = function(min, max)
 {
   return (max - min) * Math.random() + min;

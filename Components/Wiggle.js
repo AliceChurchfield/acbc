@@ -95,9 +95,9 @@ ACBC.EndWiggling = function(C)
 {
   C = ACBC.Find(C);
   if (!C) return;
-  if (!C.ACBC) C.ACBC = {};
+  if (!C.Acbca) C.Acbca = {};
 
-  C.ACBC.Wiggling = false;
+  C.Acbca.Wiggling = false;
 };
 
 

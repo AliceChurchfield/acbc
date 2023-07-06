@@ -22,8 +22,8 @@ MagicLoad = function() {
 		MagicAssistant = CharacterLoadNPC("NPC_Magic_Assistant");
 		ACBC.ActionRole("Command", MagicPerformer, true);
 		let exclude = ["Command"];
-		if (Player.ACBC.CurrentRole?.Name !== "Command")
-			exclude.push(Player.ACBC.CurrentRole.Name);
+		if (Player.Acbca.CurrentRole?.Name !== "Command")
+			exclude.push(Player.Acbca.CurrentRole.Name);
 		ACBC.RandomRole(MagicAssistant, exclude);
 		MagicPlayerAppearance = Player.Appearance.slice();
 		MagicAssistantDress();

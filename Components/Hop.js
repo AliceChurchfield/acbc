@@ -17,12 +17,13 @@ if (!window.ACBC)
 
 ACBC.Hop = class Hop extends ACBC.Component
 {
-  static SpeedBase = 500;
-  static SpeedVariance = 250;
+  static VelYBase = 500;
+  static VelYVariance = 150;
+  static HopAreaWidth = 100;
   static SquishAspectRatio = 2; // X / Y
   static PostSquishFactor = 1;
   static get MaxHopSpeed()
-  { return ACBC.Hop.SpeedBase + ACBC.Hop.SpeedVariance; }
+  { return ACBC.Hop.VelYBase + ACBC.Hop.VelYVariance; }
   static get MaxHopEnergy()
   { return ACBC.Hop.ComputeEnergy(ACBC.Hop.MaxHopSpeed); }
   
@@ -54,7 +55,11 @@ ACBC.Hop = class Hop extends ACBC.Component
   /** @type {number} */
   CurrentChainSize;
   /** @type {number} */
-  CurrentHopSpeed;
+  CurrentVelY;
+  /** @type {ACBC.Tx} */
+  Tx;
+  /** @type {ACBC.Body} */
+  Body;
 
   constructor(owner)
   {
@@ -62,10 +67,26 @@ ACBC.Hop = class Hop extends ACBC.Component
     this.Reset();
   }
 
-  get CurrentEnergy() { return ACBC.Hop.ComputeEnergy(this.CurrentHopSpeed); }
+  get CurrentEnergy() { return ACBC.Hop.ComputeEnergy(this.CurrentVelY); }
+  /** The VelX needed to get back to the origin */
+  get ReturnVelX()
+  {
+    return this.ComputeVelXNeededToReach(0);
+  }
+
+  get VelXRange()
+  {
+    let right = ACBC.Hop.HopAreaWidth / 2;
+    let left = -right;
+    let min = this.ComputeVelXNeededToReach(left);
+    let max = this.ComputeVelXNeededToReach(right);
+    return new ACBC.Range(min, max);
+  }
 
   Initialize()
   {
+    this.Tx = this.Owner.Tx;
+    this.Body = this.Owner.Body;
     this.Owner.Connect(ACBC.Events.Landed, this.OnLanded.bind(this));
   }
 
@@ -87,9 +108,9 @@ ACBC.Hop = class Hop extends ACBC.Component
    * variance and where we are in the current hop chain
    * @returns {void}
    */
-  ComputeHopSpeed()
+  ComputeVelY()
   {
-    let speed = ACBC.RandomVariance(ACBC.Hop.SpeedBase, ACBC.Hop.SpeedVariance);
+    let velY = ACBC.RandomVariance(ACBC.Hop.VelYBase, ACBC.Hop.VelYVariance);
     let scalar = 1;
 
     let hopDelta = this.CurrentChainSize - this.HopsRemaining;
@@ -101,7 +122,7 @@ ACBC.Hop = class Hop extends ACBC.Component
       scalar = numerator / denominator;
     }
 
-    this.CurrentHopSpeed = speed * scalar;
+    this.CurrentVelY = -velY * scalar;
   }
 
   /**
@@ -113,6 +134,12 @@ ACBC.Hop = class Hop extends ACBC.Component
   {
     /** @todo Consider an asymptotic function for energy vs. squish amount */
     return this.Squishiness * energy / ACBC.Hop.MaxHopEnergy;
+  }
+
+  ComputeVelXNeededToReach(posX)
+  {
+    let displacement = posX - this.Tx.PosX;
+    return displacement * this.Body.Gravity / (2 * this.CurrentVelY);
   }
 
   BeginHopping(count = 1)
@@ -127,7 +154,7 @@ ACBC.Hop = class Hop extends ACBC.Component
 
   PreSquish()
   {
-    this.ComputeHopSpeed();
+    this.ComputeVelY();
 
     let squishFactor = this.ComputeSquish(this.CurrentEnergy);
     let squishScaleX = 1 + squishFactor;
@@ -135,16 +162,24 @@ ACBC.Hop = class Hop extends ACBC.Component
     let duration = this.SquishDurationScale * squishFactor;
     let seq = this.Owner.Plans.Sequence();
     let grp = seq.Group();
-    grp.Property(this.Owner.Tx, "ScaleX", squishScaleX,
+    grp.Property(this.Tx, "ScaleX", squishScaleX,
       duration, new ACBC.Curve(ACBC.Curve.Pulse, 2), true);
-    grp.Property(this.Owner.Tx, "ScaleY", squishScaleY,
+    grp.Property(this.Tx, "ScaleY", squishScaleY,
       duration, new ACBC.Curve(ACBC.Curve.Pulse, 2), true);
     seq.Call(this.BeginRising.bind(this));
   }
 
   BeginRising()
   {
-    this.Owner.Body.SetVelY(-this.CurrentHopSpeed);
+    // If we have just one more hop left...
+    if (this.HopsRemaining <= 1)
+      // Hop back to the origin
+      this.Body.SetVelX(this.ReturnVelX);
+    else
+      // Otherwise, pick a point at random within the hop area and hop to it
+      this.Body.SetVelX(this.VelXRange.Random);
+    
+    this.Body.SetVelY(this.CurrentVelY);
   }
 
   PostSquish()
@@ -156,9 +191,9 @@ ACBC.Hop = class Hop extends ACBC.Component
     let duration = this.SquishDurationScale * squishFactor;
     let seq = this.Owner.Plans.Sequence();
     let grp = seq.Group();
-    grp.Property(this.Owner.Tx, "ScaleX", squishScaleX,
+    grp.Property(this.Tx, "ScaleX", squishScaleX,
       duration, new ACBC.Curve(ACBC.Curve.Pulse, 2), true);
-    grp.Property(this.Owner.Tx, "ScaleY", squishScaleY,
+    grp.Property(this.Tx, "ScaleY", squishScaleY,
       duration, new ACBC.Curve(ACBC.Curve.Pulse, 2), true);
     seq.Call(this.EndHopping.bind(this));
   }

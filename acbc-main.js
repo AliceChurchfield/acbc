@@ -510,9 +510,8 @@ Private.Initialize = async function()
   Private.ActionRoleSetup();
   Private.FbcEmoteTriggerSetup();
 
-  Player.ACBC = ACBC;
-
   ACBC.CharacterSetup(Player);
+  window.Acbca = Player.Acbca;
 };
 
 
@@ -1891,9 +1890,9 @@ ACBC.ActionRole = function(roleName, C, includeArmor = false, makeover = true)
   CharacterRefresh(C, true);
   ChatRoomCharacterUpdate(C);
 
-  if (!C.ACBC)
-    C.ACBC = {};
-  C.ACBC.CurrentRole = role;
+  if (!C.Acbca)
+    C.Acbca = {};
+  C.Acbca.CurrentRole = role;
 };
 
 
@@ -1902,7 +1901,7 @@ ACBC.ActionArmor = function(C, colors, internal = false)
   C = ACBC.Find(C);
   if (!C) return;
 
-  colors = colors || C.ACBC?.CurrentRole?.Colors;
+  colors = colors || C.Acbca?.CurrentRole?.Colors;
   if (!colors) return;
 
   InventoryWear(C, "MistressTop", "Cloth", colors.ArmorTop,
