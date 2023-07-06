@@ -186,7 +186,7 @@ ACBC.Body = class Body extends ACBC.Component
   {
     this.VelX = 0;
     this.VelY = 0;
-    this.Gravity = 100;
+    this.Gravity = 2500;
     this.Grounded = true;
     this.GroundY = 0;
     this.Awake = false;

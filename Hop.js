@@ -17,8 +17,8 @@ if (!window.ACBC)
 
 ACBC.Hop = class Hop extends ACBC.Component
 {
-  static SpeedBase = 100;
-  static SpeedVariance = 30;
+  static SpeedBase = 500;
+  static SpeedVariance = 250;
   static SquishAspectRatio = 2; // X / Y
   static PostSquishFactor = 1;
   static get MaxHopSpeed()
