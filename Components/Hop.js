@@ -17,15 +17,12 @@ if (!window.ACBC)
 
 ACBC.Hop = class Hop extends ACBC.Component
 {
-  static VelYBase = 500;
-  static VelYVariance = 150;
+  static SpeedYRange = new ACBC.Range(550, 700);
   static HopArea = new ACBC.Range(-50, 50);
   static SquishAspectRatio = 2; // X / Y
   static PostSquishFactor = 1;
-  static get MaxHopSpeed()
-  { return ACBC.Hop.VelYBase + ACBC.Hop.VelYVariance; }
   static get MaxHopEnergy()
-  { return ACBC.Hop.ComputeEnergy(ACBC.Hop.MaxHopSpeed); }
+  { return ACBC.Hop.ComputeEnergy(ACBC.Hop.SpeedYRange.Max); }
   
   /**
    * Calculates and returns the amount of energy to produce the given speed
@@ -97,19 +94,16 @@ ACBC.Hop = class Hop extends ACBC.Component
    */
   ComputeVelY()
   {
-    let velY = ACBC.RandomVariance(ACBC.Hop.VelYBase, ACBC.Hop.VelYVariance);
-    let scalar = 1;
+    // let hopDelta = this.CurrentChainSize - this.HopsRemaining;
+    // if (hopDelta > 0)
+    // {
+    //   /** @todo Consider generalizing this formula */
+    //   let denominator = 2 * (this.CurrentChainSize - 1);
+    //   let numerator = denominator - hopDelta;
+    //   scalar = numerator / denominator;
+    // }
 
-    let hopDelta = this.CurrentChainSize - this.HopsRemaining;
-    if (hopDelta > 0)
-    {
-      /** @todo Consider generalizing this formula */
-      let denominator = 2 * (this.CurrentChainSize - 1);
-      let numerator = denominator - hopDelta;
-      scalar = numerator / denominator;
-    }
-
-    this.CurrentVelY = -velY * scalar;
+    this.CurrentVelY = -ACBC.Hop.SpeedYRange.Random();
   }
 
   /**
