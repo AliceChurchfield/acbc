@@ -54,6 +54,7 @@ ACBC.Curve = class Curve
   {
     return ACBC.Curve.#Instances.Get(ACBC.Curve.#Functions.Pulse, exponent);
   }
+  static get Parabola() { return ACBC.Curve.#Instances.Parabola; }
   static Quad = class Quad
   {
     static get In() { return ACBC.Curve.#Instances.Quad.In; }
@@ -142,6 +143,7 @@ ACBC.Curve = class Curve
   static #Instances = class Instances
   {
     static Linear = new ACBC.Curve(ACBC.Curve.#Functions.Linear);
+    static Parabola = new ACBC.Curve(ACBC.Curve.#Functions.Parabola);
     static Quad = class Quad
     {
       static In = new ACBC.Curve(ACBC.Curve.#Functions.Quad.In);
@@ -188,6 +190,12 @@ ACBC.Curve = class Curve
   static #Functions = class Functions
   {
     static Linear(t) { return t; }
+
+    static Parabola(t)
+    {
+      t = 1 - 2 * t;
+      return 1 - t * t;
+    }
 
     static Pulse(t, exponent = 2)
     {
