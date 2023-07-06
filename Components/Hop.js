@@ -19,7 +19,7 @@ ACBC.Hop = class Hop extends ACBC.Component
 {
   static VelYBase = 500;
   static VelYVariance = 150;
-  static HopAreaWidth = 100;
+  static HopArea = new ACBC.Range(-50, 50);
   static SquishAspectRatio = 2; // X / Y
   static PostSquishFactor = 1;
   static get MaxHopSpeed()
@@ -68,20 +68,7 @@ ACBC.Hop = class Hop extends ACBC.Component
   }
 
   get CurrentEnergy() { return ACBC.Hop.ComputeEnergy(this.CurrentVelY); }
-  /** The VelX needed to get back to the origin */
-  get ReturnVelX()
-  {
-    return this.ComputeVelXNeededToReach(0);
-  }
-
-  get VelXRange()
-  {
-    let right = ACBC.Hop.HopAreaWidth / 2;
-    let left = -right;
-    let min = this.ComputeVelXNeededToReach(left);
-    let max = this.ComputeVelXNeededToReach(right);
-    return new ACBC.Range(min, max);
-  }
+  get CurrentHopDuration() { return -2 * this.CurrentVelY / this.Body.Gravity; }
 
   Initialize()
   {
@@ -136,12 +123,6 @@ ACBC.Hop = class Hop extends ACBC.Component
     return this.Squishiness * energy / ACBC.Hop.MaxHopEnergy;
   }
 
-  ComputeVelXNeededToReach(posX)
-  {
-    let displacement = posX - this.Tx.PosX;
-    return displacement * this.Body.Gravity / (2 * this.CurrentVelY);
-  }
-
   BeginHopping(count = 1)
   {
     this.CurrentChainSize = this.HopsRemaining = count;
@@ -171,14 +152,12 @@ ACBC.Hop = class Hop extends ACBC.Component
 
   BeginRising()
   {
-    // If we have just one more hop left...
-    if (this.HopsRemaining <= 1)
-      // Hop back to the origin
-      this.Body.SetVelX(this.ReturnVelX);
-    else
-      // Otherwise, pick a point at random within the hop area and hop to it
-      this.Body.SetVelX(this.VelXRange.Random);
-    
+    // If we have just one more hop left, hop back to the origin
+    // Otherwise, pick a point at random within the hop area and hop to it
+    let end = this.HopsRemaining > 1 ? ACBC.Hop.HopArea.Random() : 0;
+    let duration = this.CurrentHopDuration;
+    this.Owner.Plans.Property(this.Tx, "PosX", end, duration,
+      new ACBC.Curve(ACBC.Curve.Linear));
     this.Body.SetVelY(this.CurrentVelY);
   }
 

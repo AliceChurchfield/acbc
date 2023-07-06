@@ -33,16 +33,29 @@ ACBC.Range = class Range
   }
 
   get Span() { return this.Max - this.Min; }
-  get Random() { return ACBC.Random(this.Min, this.Max); }
+
+  Random() { return ACBC.Random(this.Min, this.Max); }
 };
 
 
+/**
+ * Generates a random floating-point value within the range [`min`, `max`)
+ * @param {number} min The lower bound
+ * @param {number} max The upper bound
+ * @returns {number} The random value
+ */
 ACBC.Random = function(min, max)
 {
   return (max - min) * Math.random() + min;
 }
 
-
+/**
+ * Generates a random floating-point value within the range
+ * [`base` - `variance`, `base` + `variance`)
+ * @param {number} base The base value
+ * @param {number} variance The variance on either side
+ * @returns {number}
+ */
 ACBC.RandomVariance = function(base, variance)
 {
   return base + variance * (2 * Math.random() - 1);
