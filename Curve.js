@@ -48,7 +48,17 @@ ACBC.Curve = class Curve
     return ACBC.Lerp(start, end, this.Function(t, ...this.Parameters));
   }
 
-  // Factories
+  /* ***********
+   * Factories *
+   *********** */
+  /*
+   * This is the main public interface for creating curves. These functions
+   * refer to the private #Instances class, either via a static getter in the
+   * case of non-parametric functions such as Linear and Parabola, or via a
+   * static function that passes its parameters into the static #Instances.Get
+   * function, which uses them to grab (or initialize) the correct function
+   * from the cache.
+   */
   static get Linear() { return ACBC.Curve.#Instances.Linear; }
   static ShapedPulse(t, exponent = 2, easeIn = true, easeOut = true)
   {
@@ -151,21 +161,26 @@ ACBC.Curve = class Curve
     static get InOut() { return ACBC.Curve.#Instances.Bounce.InOut; }
   }
 
+  /**
+   * Here is where the static Curve instances live. **Every instance contained
+   * herein *must* be constructed in a static initialization block below**
+   * (but *not* inside) **the `Instances` class.** This is just how JS works.
+   */
   static #Instances = class Instances
   {
-    static Linear = new ACBC.Curve(ACBC.Curve.#Functions.Linear);
-    static Parabola = new ACBC.Curve(ACBC.Curve.#Functions.Parabola);
+    static Linear;
+    static Parabola;
     static Quad = class Quad
     {
-      static In = new ACBC.Curve(ACBC.Curve.#Functions.Quad.In);
-      static Out = new ACBC.Curve(ACBC.Curve.#Functions.Quad.Out);
-      static InOut = new ACBC.Curve(ACBC.Curve.#Functions.Quad.InOut);
+      static In;
+      static Out;
+      static InOut;
     }
     static Bounce = class Bounce
     {
-      static In = new ACBC.Curve(ACBC.Curve.#Functions.Bounce.In);
-      static Out = new ACBC.Curve(ACBC.Curve.#Functions.Bounce.Out);
-      static InOut = new ACBC.Curve(ACBC.Curve.#Functions.Bounce.InOut);
+      static In;
+      static Out;
+      static InOut;
     }
 
     /** @type {Map<CurveFunction, Map<string, ACBC.Curve>>} */
@@ -196,6 +211,17 @@ ACBC.Curve = class Curve
 
       return value;
     }
+  }
+  static // Static initialization for #Instances above
+  {
+    this.#Instances.Linear = new this(this.#Functions.Linear);
+    this.#Instances.Parabola = new this(this.#Functions.Parabola);
+    this.#Instances.Quad.In = new this(this.#Functions.Quad.In);
+    this.#Instances.Quad.Out = new this(this.#Functions.Quad.Out);
+    this.#Instances.Quad.InOut = new this(this.#Functions.Quad.InOut);
+    this.#Instances.Bounce.In = new this(this.#Functions.Bounce.In);
+    this.#Instances.Bounce.Out = new this(this.#Functions.Bounce.Out);
+    this.#Instances.Bounce.InOut = new this(this.#Functions.Bounce.InOut);
   }
 
   static #Functions = class Functions
