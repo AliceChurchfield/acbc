@@ -114,12 +114,13 @@ ACBC.Hop = class Hop extends ACBC.Component
     let duration = this.ComputeDurationForHeight(height);
     remainingDuration -= duration;
     let remainingDistance = Math.abs(destPosX - currPosX);
-    let baseSpeedX = remainingDistance / (remainingDuration - duration);
+    let baseSpeedX = remainingDistance / remainingDuration;
     let variance = baseSpeedX * this.XVarianceFraction;
     let speedX = ACBC.RandomVariance(baseSpeedX, variance);
     let posX = currPosX + speedX * duration;
+    let posY = -height;
     let delay = Math.random() < this.DelayChance ? this.DelayRange.Random() : 0;
-    let nextHopDuration = this.AddHop(posX, height, duration, delay, false);
+    let nextHopDuration = this.AddHop(posX, posY, duration, delay, false);
     remainingDuration -= nextHopDuration;
 
     this.NextHopGivenDestinationAndDuration(posX, destPosX, remainingDuration);
@@ -139,12 +140,12 @@ ACBC.Hop = class Hop extends ACBC.Component
     let energy = ACBC.Hop.ComputeEnergy(speedY);
     let squishFactor = this.ComputeSquishFactor(energy);
     let preScaleX = 1 + squishFactor;
-    let preScaleY = 1 - squishFactor / ACBC.Hop.SquishAspectRatio;
+    let preScaleY = 1 - squishFactor / this.SquishAspectRatio;
     let preDur = this.SquishDurationScale * squishFactor;
     let squishCurve = ACBC.Curve.Pulse(2);
     let eventData = new ACBC.EventData;
     let postScaleX = 1 + squishFactor;
-    let postScaleY = 1 - squishFactor / ACBC.Hop.SquishAspectRatio;
+    let postScaleY = 1 - squishFactor / this.SquishAspectRatio;
     let postDur = this.SquishDurationScale * squishFactor;
 
     if (final)
