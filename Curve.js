@@ -50,9 +50,15 @@ ACBC.Curve = class Curve
 
   // Factories
   static get Linear() { return ACBC.Curve.#Instances.Linear; }
+  static ShapedPulse(t, exponent = 2, easeIn = true, easeOut = true)
+  {
+    return ACBC.Curve.#Instances.Get(
+      ACBC.Curve.#Functions.ShapedPulse, exponent, easeIn, easeOut);
+  }
   static Pulse(exponent = 2)
   {
-    return ACBC.Curve.#Instances.Get(ACBC.Curve.#Functions.Pulse, exponent);
+    return ACBC.Curve.#Instances.Get(
+      ACBC.Curve.#Functions.Pulse, exponent);
   }
   static get Parabola() { return ACBC.Curve.#Instances.Parabola; }
   static Quad = class Quad
@@ -113,6 +119,11 @@ ACBC.Curve = class Curve
     {
       return ACBC.Curve.#Instances.Get(
         ACBC.Curve.#Functions.Elastic.InOut, period, exponent);
+    }
+    static Alt(t, frequency = 3.3, exponent = 4)
+    {
+      return ACBC.Curve.#Instances.Get(
+        ACBC.Curve.#Functions.Elastic.Alt, frequency, exponent);
     }
   }
   static Back = class Back
@@ -197,6 +208,30 @@ ACBC.Curve = class Curve
       return 1 - t * t;
     }
 
+    static ShapedPulse(t, exponent = 2, easeIn = true, easeOut = true)
+    {
+      if (t < 0.5)
+      {
+        if (easeIn)
+        {
+          if (t < 0.25)
+            return Math.pow(4 * t, exponent) / 2;
+          return 1 - Math.pow(2 - 4 * t, exponent) / 2;
+        }
+        return 1 - Math.pow(1 - 2 * t, exponent);
+      }
+      else
+      {
+        if (easeOut)
+        {
+          if (t < 0.75)
+            return 1 - Math.pow(4 * t - 2, exponent) / 2;
+          return Math.pow(4 - 4 * t, exponent) / 2;
+        }
+        return 1 - Math.pow(2 * t - 1, exponent);
+      }
+    }
+
     static Pulse(t, exponent = 2)
     {
       let y0 = x => Math.pow(4 * x, exponent) / 2;
@@ -260,6 +295,13 @@ ACBC.Curve = class Curve
     /** @todo Plot this in Desmos to see whether it's actually good */
     static Elastic = class Elastic
     {
+      static Alt(t, frequency = 3.3, exponent = 4)
+      {
+        let shape = Math.pow(1 - t, exponent);
+        let wave = -Math.cos(ACBC.Tau * frequency * t)
+        return shape * wave + 1;
+      }
+
       /** @constant */
       static PowerCoefficient = 0.0009765625; // for default exponent of 10
       

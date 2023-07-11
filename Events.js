@@ -15,12 +15,15 @@ if (!window.ACBC)
 }
 
 
+/** @enum {string} */
 ACBC.Events =
 {
   MainUpdate: "MainUpdate",
   PhysicsUpdate: "PhysicsUpdate",
   LeftGround: "LeftGround",
   Landed: "Landed",
+  HopUp: "HopUp",
+  HopDown: "HopDown",
 };
 
 

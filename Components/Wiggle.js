@@ -101,7 +101,7 @@ ACBC.EndWiggling = function(C)
 };
 
 
-ACBC.HookFunction("DrawCharacter", 0, ACBC.DrawCharacterWithWiggle);
+ACBC.HookFunction("DrawCharacter", 0, ACBC.DrawCharacterWithWiggle, "Wiggle");
 
 
 console.log(" * Wiggle.js loaded.");

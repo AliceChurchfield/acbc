@@ -34,9 +34,9 @@ ACBC.Plan = class Plan
   /** @type {boolean} */
   Active;
   /** @type {number} */
-  Duration;
+  Duration = 0;
   /** @type {number} */
-  Remaining;
+  Remaining = 0;
 
   constructor()
   {
@@ -50,6 +50,9 @@ ACBC.Plan = class Plan
   {
     return this.Duration === 0 ? 1 : 1 - this.Remaining / this.Duration;
   }
+
+  /** @virtual */
+  get TotalRemainingDuration() { return this.Remaining; }
 
   /**
    * Updates the plan, nudging it one step closer to completion
@@ -67,6 +70,7 @@ ACBC.Plan = class Plan
 
   /**
    * Terminates the plan prematurely
+   * @virtual
    * @returns {void} - Nothing
    */
   Cancel()
@@ -158,6 +162,14 @@ ACBC.PlanSet = class PlanSet extends ACBC.Plan
     return this.Empty ? ACBC.Plan.State.Completed : ACBC.Plan.State.Running;
   }
 
+  /** @override */
+  Cancel()
+  {
+    for (const plan of this.Plans)
+      plan.Cancel();
+    this.Plans = [];
+  }
+
   /**
    * Makes a new PlanGroup and adds it to this set
    * @returns {ACBC.PlanGroup} The group that was made (for chaining)
@@ -182,7 +194,8 @@ ACBC.PlanSet = class PlanSet extends ACBC.Plan
   }
   /**
    * Makes a new PlanCall and adds it to this set
-   * @param {PlanCallback} callback The function to call
+   * @param {PlanCallback} callback The function to call.
+   * ***`Remember to use proper binding!`***
    * @param {boolean} live @see PlanCallback for explanation
    * @param  {any[] | LiveArg[]} args Any arguments to pass to the callback
    * @returns {ACBC.PlanSet} This set (for chaining)
@@ -190,6 +203,18 @@ ACBC.PlanSet = class PlanSet extends ACBC.Plan
   Call(callback, live = false, ...args)
   {
     this.Add(new ACBC.PlanCall(callback, live, ...args));
+    return this;
+  }
+  /**
+   * Makes a new PlanDispatch and adds it to this set
+   * @param {ACBC.Acbca} dispatcher The Acbca who should dispatch the event
+   * @param {ACBC.Events} eventName The event to dispatch
+   * @param {ACBC.EventData} eventData The event data to go with it
+   * @returns {ACBC.PlanSet} This set (for chaining)
+   */
+  Dispatch(dispatcher, eventName, eventData)
+  {
+    this.Add(new ACBC.PlanDispatch(dispatcher, eventName, eventData));
     return this;
   }
   /**
@@ -221,6 +246,17 @@ ACBC.PlanGroup = class PlanGroup extends ACBC.PlanSet
     super();
     this.Name = "Group";
   }
+
+  /** @override */
+  get TotalRemainingDuration()
+  {
+    let longest = 0;
+    for (const plan of this.Plans)
+      if (plan.TotalRemainingDuration > longest)
+        longest = plan.TotalRemainingDuration;
+    return longest;
+  }
+
   /** @override */
   Update(dt) { return this.ProcessPlans(dt, false); }
 };
@@ -233,6 +269,16 @@ ACBC.PlanSequence = class PlanSequence extends ACBC.PlanSet
     super();
     this.Name = "Sequence";
   }
+
+  /** @override */
+  get TotalRemainingDuration()
+  {
+    let total = 0;
+    for (const plan of this.Plans)
+      total += plan.TotalRemainingDuration;
+    return total;
+  }
+
   /** @override */
   Update(dt) { return this.ProcessPlans(dt, true); }
 };
@@ -305,13 +351,45 @@ ACBC.PlanCall = class PlanCall extends ACBC.Plan
   Update(_dt)
   {
     this.Started = true;
-    this.Remaining = 0;
 
     if (this.Live)
       this.Args = this.Args.map(a => a.Object[a.Key]);
     
     /** @todo Decide whether any further checking needs to be done here */
     this.Callback(...this.Args);
+
+    return ACBC.Plan.State.Completed;
+  }
+};
+
+/** @extends ACBC.Plan */
+ACBC.PlanDispatch = class PlanDispatch extends ACBC.Plan
+{
+  /** @type {ACBC.Acbca} */
+  Dispatcher;
+  /** @type {ACBC.Events} */
+  EventName;
+  /** @type {ACBC.EventData} */
+  EventData;
+
+  /**
+   * @param {ACBC.Acbca} dispatcher 
+   * @param {ACBC.Events} eventName 
+   * @param {ACBC.EventData} eventData 
+   */
+  constructor(dispatcher, eventName, eventData)
+  {
+    super();
+    this.Name = "Dispatch";
+    this.Dispatcher = dispatcher;
+    this.EventName = eventName;
+    this.EventData = eventData;
+  }
+
+  Update(_dt)
+  {
+    this.Started = true;
+    this.Dispatcher.Dispatch(this.EventName, this.EventData);
 
     return ACBC.Plan.State.Completed;
   }

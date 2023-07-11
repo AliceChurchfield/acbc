@@ -17,13 +17,8 @@ if (!window.ACBC)
 
 ACBC.Hop = class Hop extends ACBC.Component
 {
-  static SpeedYRange = new ACBC.Range(550, 700);
-  static HopArea = new ACBC.Range(-50, 50);
-  static SquishAspectRatio = 2; // X / Y
-  static PostSquishFactor = 1;
   static ExitDuration = 20;
-  static get MaxHopEnergy()
-  { return ACBC.Hop.ComputeEnergy(ACBC.Hop.SpeedYRange.Max); }
+  static ExitPosX = 500;
   
   /**
    * Calculates and returns the amount of energy to produce the given speed
@@ -45,25 +40,29 @@ ACBC.Hop = class Hop extends ACBC.Component
    * How long in seconds it would take to complete a squish of factor 1
    */
   SquishDurationScale;
-
   /** @type {boolean} */
   Hopping;
-  /** @type {boolean} */
-  HoppingTowardExit;
+  /** @type {ACBC.Range} */
+  HopHeightRange;
   /** @type {number} */
-  HopsRemaining;
+  XVarianceFraction;
   /** @type {number} */
-  CurrentChainSize;
+  DelayChance;
+  /** @type {ACBC.Range} */
+  DelayRange;
+  /** @type {ACBC.Range} */
+  XHopArea;
   /** @type {number} */
-  CurrentVelY;
+  SquishAspectRatio;
   /** @type {number} */
-  HopDestinationX;
+  PostSquishFactor;
+  /** @type {ACBC.PlanSequence} */
+  Sequence;
+
   /** @type {ACBC.Tx} */
   Tx;
   /** @type {ACBC.Body} */
   Body;
-
-  ExitHops = [];
 
   constructor(owner)
   {
@@ -71,130 +70,110 @@ ACBC.Hop = class Hop extends ACBC.Component
     this.Reset();
   }
 
-  get CurrentEnergy() { return ACBC.Hop.ComputeEnergy(this.CurrentVelY); }
-  get CurrentHopDuration() { return this.ComputeHopDuration(this.CurrentVelY); }
-  get HopDurationRange()
-  { return ACBC.Hop.SpeedYRange.Apply(this.ComputeHopDuration, this); }
+  get MaxSpeedY()
+  { return this.ComputeSpeedForHeight(this.HopHeightRange.Max); }
+  get MaxEnergy()
+  { return ACBC.Hop.ComputeEnergy(this.MaxSpeedY); }
+  get MaxHopDuration()
+  { return this.ComputeDurationForSpeed(this.MaxSpeedY); }
 
   Initialize()
   {
     this.Tx = this.Owner.Tx;
     this.Body = this.Owner.Body;
-    this.Owner.Connect(ACBC.Events.Landed, this.OnLanded.bind(this));
   }
 
-  /**
-   * @param {ACBC.BodyEvent} _bodyEvent 
-   */
-  OnLanded(_bodyEvent)
+  BeginHoppingTowardExit()
   {
-    --this.HopsRemaining;
-
-    if (this.HopsRemaining > 0)
-      this.PreSquish();
-    else
-      this.PostSquish();
+    if (this.Sequence)
+      this.Sequence.Cancel();
+    this.Sequence = this.Owner.Plans.Sequence();
+    let currPosX = this.Tx.PosX;
+    let destPosX = ACBC.Hop.ExitPosX;
+    let duration = ACBC.Hop.ExitDuration;
+    this.NextHopGivenDestinationAndDuration(currPosX, destPosX, duration);
   }
 
   /**
-   * Calculates and stores the speed of the current hop, based on random
-   * variance and where we are in the current hop chain
+   * Recursively calls itself to add enough hops to fill the given duration
+   * @param {number} currPosX Where we'll be when this hop starts
+   * @param {number} destPosX Where we're ultimately hopping to
+   * @param {number} remainingDuration How much time is still left for hops
    * @returns {void}
    */
-  NextVelY()
+  NextHopGivenDestinationAndDuration(currPosX, destPosX, remainingDuration)
   {
-    // let hopDelta = this.CurrentChainSize - this.HopsRemaining;
-    // if (hopDelta > 0)
-    // {
-    //   /** @todo Consider generalizing this formula */
-    //   let denominator = 2 * (this.CurrentChainSize - 1);
-    //   let numerator = denominator - hopDelta;
-    //   scalar = numerator / denominator;
-    // }
+    if (remainingDuration <= this.MaxHopDuration)
+    {
+      let height = this.ComputeHeightForDuration(remainingDuration);
+      this.AddHop(destPosX, height, remainingDuration, 0, true);
+      return;
+    }
 
-    this.CurrentVelY = -ACBC.Hop.SpeedYRange.Random();
+    let height = this.HopHeightRange.Random();
+    let duration = this.ComputeDurationForHeight(height);
+    remainingDuration -= duration;
+    let remainingDistance = Math.abs(destPosX - currPosX);
+    let baseSpeedX = remainingDistance / (remainingDuration - duration);
+    let variance = baseSpeedX * this.XVarianceFraction;
+    let speedX = ACBC.RandomVariance(baseSpeedX, variance);
+    let posX = currPosX + speedX * duration;
+    let delay = Math.random() < this.DelayChance ? this.DelayRange.Random() : 0;
+    let nextHopDuration = this.AddHop(posX, height, duration, delay, false);
+    remainingDuration -= nextHopDuration;
+
+    this.NextHopGivenDestinationAndDuration(posX, destPosX, remainingDuration);
   }
 
   /**
-   * Calculates and returns the squish factor resulting from the given energy
-   * @param {number} energy 
-   * @returns {number}
+   * @param {number} posX The destination PosX to hop to
+   * @param {number} posY The height of the hop
+   * @param {number} duration The duration of the hop (not including squish)
+   * @param {number} delay Any delay to use after this hop and before the next
+   * @param {boolean} final Whether this is the final hop in the sequence
+   * @returns {number} How long this hop will take, including squish and delay
    */
-  ComputeSquish(energy)
+  AddHop(posX, posY, duration, delay = 0, final = false)
   {
-    /** @todo Consider an asymptotic function for energy vs. squish amount */
-    return this.Squishiness * energy / ACBC.Hop.MaxHopEnergy;
-  }
+    let speedY = this.ComputeSpeedForHeight(posY);
+    let energy = ACBC.Hop.ComputeEnergy(speedY);
+    let squishFactor = this.ComputeSquishFactor(energy);
+    let preScaleX = 1 + squishFactor;
+    let preScaleY = 1 - squishFactor / ACBC.Hop.SquishAspectRatio;
+    let preDur = this.SquishDurationScale * squishFactor;
+    let squishCurve = ACBC.Curve.Pulse(2);
+    let eventData = new ACBC.EventData;
+    let postScaleX = 1 + squishFactor;
+    let postScaleY = 1 - squishFactor / ACBC.Hop.SquishAspectRatio;
+    let postDur = this.SquishDurationScale * squishFactor;
 
-  /**
-   * @param {number} velY 
-   * @returns {number}
-   */
-  ComputeHopDuration(velY)
-  {
-    return -2 * velY / this.Body.Gravity;
-  }
-
-  ComputeHopCountRangeForDuration(duration)
-  {
-    let range = this.HopDurationRange;
-    let min = ACBC.Hop.ExitDuration / range.Max;
-    let max = ACBC.Hop.ExitDuration / range.Min;
-
-    return new ACBC.Range(Math.floor(min), Math.floor(max));
-  }
-
-  BeginHopping(count = 1)
-  {
-    this.CurrentChainSize = this.HopsRemaining = count;
-    this.HoppingTowardExit = false;
-
-    if (this.Hopping) return;
-
-    this.Hopping = true;
-    this.PreSquish();
-  }
-
-  PreSquish()
-  {
-    this.NextVelY();
-
-    let squishFactor = this.ComputeSquish(this.CurrentEnergy);
-    let squishScaleX = 1 + squishFactor;
-    let squishScaleY = 1 - squishFactor / ACBC.Hop.SquishAspectRatio;
-    let duration = this.SquishDurationScale * squishFactor;
-    let curve = ACBC.Curve.Pulse(2);
-    let seq = this.Owner.Plans.Sequence();
-    let grp = seq.Group();
-    grp.Property(this.Tx, "ScaleX", squishScaleX, duration, curve, true);
-    grp.Property(this.Tx, "ScaleY", squishScaleY, duration, curve, true);
-    seq.Call(this.BeginRising.bind(this));
-  }
-
-  BeginRising()
-  {
-    // If we have just one more hop left, hop back to the origin
-    // Otherwise, pick a point at random within the hop area and hop to it
-    let end = this.HopsRemaining > 1 ? ACBC.Hop.HopArea.Random() : 0;
-    let duration = this.CurrentHopDuration;
-    let curve = ACBC.Curve.Linear;
-    this.Owner.Plans.Property(this.Tx, "PosX", end, duration, curve);
-    this.Body.SetVelY(this.CurrentVelY);
-  }
-
-  PostSquish()
-  {
-    let squishFactor = this.ComputeSquish(this.CurrentEnergy) *
-      ACBC.Hop.PostSquishFactor;
-    let squishScaleX = 1 + squishFactor;
-    let squishScaleY = 1 - squishFactor / ACBC.Hop.SquishAspectRatio;
-    let duration = this.SquishDurationScale * squishFactor;
-    let curve = ACBC.Curve.Pulse(2);
-    let seq = this.Owner.Plans.Sequence();
-    let grp = seq.Group();
-    grp.Property(this.Tx, "ScaleX", squishScaleX, duration, curve, true);
-    grp.Property(this.Tx, "ScaleY", squishScaleY, duration, curve, true);
-    seq.Call(this.EndHopping.bind(this));
+    if (final)
+      duration -= (preDur + postDur);
+    
+    let preGrp = this.Sequence.Group();
+    preGrp.Property(this.Tx, "ScaleX", preScaleX, preDur, squishCurve, true);
+    preGrp.Property(this.Tx, "ScaleY", preScaleY, preDur, squishCurve, true);
+    this.Sequence.Dispatch(this.Owner, ACBC.Events.HopUp, eventData);
+    let hopGrp = this.Sequence.Group();
+    hopGrp.Property(this.Tx, "PosX", posX, duration, ACBC.Curve.Linear);
+    hopGrp.Property(this.Tx, "PosY", posY, duration, ACBC.Curve.Parabola, true);
+    this.Sequence.Dispatch(this.Owner, ACBC.Events.HopDown, eventData);
+    
+    if (delay <= 0 && !final)
+    return preDur + duration;
+    
+    squishFactor *= ACBC.Hop.PostSquishFactor;
+    let postGrp = this.Sequence.Group();
+    postGrp.Property(this.Tx, "ScaleX", postScaleX, postDur, squishCurve, true);
+    postGrp.Property(this.Tx, "ScaleY", postScaleY, postDur, squishCurve, true);
+    
+    if (delay > 0)
+      this.Sequence.Delay(delay);
+    
+    if (final)
+      this.Sequence.Call(this.EndHopping.bind(this));
+    
+    return preDur + duration + postDur + delay;
   }
 
   EndHopping()
@@ -202,22 +181,58 @@ ACBC.Hop = class Hop extends ACBC.Component
     this.Hopping = false;
   }
 
-  BeginHoppingTowardExit()
+  /**
+   * @param {number} speed 
+   * @returns {number}
+   */
+  ComputeDurationForSpeed(speed)
   {
-    /**
-     * @todo
-     * Rewrite this whole system with Plan-based Y movement :|
-     */
+    return 2 * speed / this.Body.Gravity;
+  }
+
+  ComputeSpeedForHeight(height)
+  {
+    return Math.sqrt(Math.abs(2 * this.Body.Gravity * height));
+  }
+
+  ComputeHeightForDuration(duration)
+  {
+    let tf = duration;  // t final
+    let a = this.Body.Gravity;
+    let vi = -a * tf / 2;
+    let tm = duration / 2; // t middle
+    return 1/2 * a * tm * tm + vi * tm;
+  }
+
+  ComputeDurationForHeight(height)
+  {
+    let speed = this.ComputeSpeedForHeight(height);
+    return this.ComputeDurationForSpeed(speed);
+  }
+
+  /**
+   * Calculates and returns the squish factor resulting from the given energy
+   * @param {number} energy 
+   * @returns {number}
+   */
+  ComputeSquishFactor(energy)
+  {
+    /** @todo Consider an asymptotic function for energy vs. squish amount */
+    return this.Squishiness * energy / this.MaxEnergy;
   }
 
   Reset()
   {
     this.Squishiness = 0.1;
     this.SquishDurationScale = 3;
-
     this.Hopping = false;
-    this.HopsRemaining = 0;
-    this.CurrentChainSize = 0;
+    this.HopHeightRange = new ACBC.Range(80, 120);
+    this.XVarianceFraction = 0.3;
+    this.DelayChance = 0.2;
+    this.DelayRange = new ACBC.Range(0.2, 0.5);
+    this.XHopArea = new ACBC.Range(-20, 20);
+    this.SquishAspectRatio = 2;
+    this.PostSquishFactor = 0.9;
   }
 };
 

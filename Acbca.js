@@ -57,7 +57,7 @@ ACBC.Acbca = class Acbca
   Components = [];
   /** @type {ACBC.PlanGroup} */
   Plans;
-  /** @type {Map<string, EventHandler[]>} */
+  /** @type {Map<ACBC.Events, EventHandler[]>} */
   EventConnections = new Map;
 
   /**
@@ -109,7 +109,7 @@ ACBC.Acbca = class Acbca
   }
 
   /**
-   * @param {string} eventName 
+   * @param {ACBC.Events} eventName 
    * @param {EventHandler} handler ***`Remember to use proper binding!`***
    * @returns {void}
    */
@@ -124,7 +124,7 @@ ACBC.Acbca = class Acbca
   }
 
   /**
-   * @param {string} eventName 
+   * @param {ACBC.Events} eventName 
    * @param {EventHandler} handler ***`Remember to use proper binding!`***
    * @returns {void}
    */
@@ -158,7 +158,7 @@ ACBC.Acbca = class Acbca
   }
 
   /**
-   * @param {string} eventName 
+   * @param {ACBC.Events} eventName 
    * @param {ACBC.EventData} eventData 
    */
   Dispatch(eventName, eventData)
@@ -221,7 +221,7 @@ ACBC.GameRunCharacterUpdate = function(args, next)
 };
 
 
-ACBC.HookFunction("GameRun", 0, ACBC.GameRunCharacterUpdate);
+ACBC.HookFunction("GameRun", 0, ACBC.GameRunCharacterUpdate, "Acbca");
 
 
 console.log(" * Acbca.js loaded.");

@@ -69,4 +69,13 @@
 			"${1:EnumEntry}: \"${1:EnumEntry}\",$0",
 		],
 	},
+	"Register function hook":
+	{
+		"description": "Hooks a function",
+		"prefix": "hook",
+		"body":
+		[
+			"ACBC.HookFunction(\"${1:functionName}\", ${2:priority}, ${3:hook}, \"${4:${TM_FILENAME_BASE}}\");$0",
+		],
+	},
 }

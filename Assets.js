@@ -96,7 +96,7 @@ ACBC.DrawCharacterAssetMods = function(args, next)
 };
 
 
-ACBC.HookFunction("DrawCharacter", 0, ACBC.DrawCharacterAssetMods);
+ACBC.HookFunction("DrawCharacter", 0, ACBC.DrawCharacterAssetMods, "Assets");
 
 
 console.log(" * Assets.js loaded.");

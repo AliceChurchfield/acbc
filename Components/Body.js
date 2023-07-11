@@ -136,7 +136,7 @@ ACBC.Body = class Body extends ACBC.Component
   LeaveGround()
   {
     let bodyEvent = new ACBC.BodyEvent();
-    this.Owner.Dispatch("LeftGround", bodyEvent);
+    this.Owner.Dispatch(ACBC.Events.LeftGround, bodyEvent);
   }
 
   Land()
@@ -145,7 +145,7 @@ ACBC.Body = class Body extends ACBC.Component
     this.VelY = 0;
 
     let bodyEvent = new ACBC.BodyEvent();
-    this.Owner.Dispatch("Landed", bodyEvent);
+    this.Owner.Dispatch(ACBC.Events.Landed, bodyEvent);
   }
 
   Sleep()

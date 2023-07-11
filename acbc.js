@@ -72,8 +72,8 @@ function AddAcbcScript(filename)
   AddScript(`https://alicechurchfield.github.io/acbc/${filename}`);
 }
 
-AddAcbcScript("acbc-main.js");
 AddAcbcScript("acbc-util.js");
+AddAcbcScript("acbc-main.js");
 
 AddAcbcScript("Time.js");
 AddAcbcScript("Math.js");

@@ -15,6 +15,10 @@ if (!window.ACBC)
 }
 
 
+ACBC.Tau = 2 * Math.PI;
+ACBC.Const("Tau");
+
+
 ACBC.Range = class Range
 {
   /** @member {number} */
