@@ -85,13 +85,24 @@ ACBC.Hop = class Hop extends ACBC.Component
 
   BeginHoppingTowardExit()
   {
+    let destPosX = ACBC.Hop.ExitPosX;
+    let duration = ACBC.Hop.ExitDuration;
+    this.HopToWithDuration(destPosX, duration);
+  }
+
+  /**
+   * Makes this character hop to the given position over the given duration
+   * @param {number} destPosX The X position to hop to
+   * @param {number} duration How long it should take to get there
+   */
+  HopToWithDuration(destPosX, duration)
+  {
     if (this.Sequence)
       this.Sequence.Cancel();
     this.Sequence = this.Owner.Plans.Sequence();
     let currPosX = this.Tx.PosX;
-    let destPosX = ACBC.Hop.ExitPosX;
-    let duration = ACBC.Hop.ExitDuration;
     this.NextHopGivenDestinationAndDuration(currPosX, destPosX, duration);
+    console.log(this.Sequence);
   }
 
   /**
