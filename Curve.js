@@ -163,8 +163,9 @@ ACBC.Curve = class Curve
 
   /**
    * Here is where the static Curve instances live. **Every instance contained
-   * herein *must* be constructed in a static initialization block below**
-   * (but *not* inside) **the `Instances` class.** This is just how JS works.
+   * herein *must* be constructed in a static initialization block at the
+   * bottom of the `Curve` class**, where it can see both the private static
+   * `#Instances` and `#Functions` classes. This is just how JS works.
    */
   static #Instances = class Instances
   {
@@ -211,17 +212,6 @@ ACBC.Curve = class Curve
 
       return value;
     }
-  }
-  static // Static initialization for #Instances above
-  {
-    this.#Instances.Linear = new this(this.#Functions.Linear);
-    this.#Instances.Parabola = new this(this.#Functions.Parabola);
-    this.#Instances.Quad.In = new this(this.#Functions.Quad.In);
-    this.#Instances.Quad.Out = new this(this.#Functions.Quad.Out);
-    this.#Instances.Quad.InOut = new this(this.#Functions.Quad.InOut);
-    this.#Instances.Bounce.In = new this(this.#Functions.Bounce.In);
-    this.#Instances.Bounce.Out = new this(this.#Functions.Bounce.Out);
-    this.#Instances.Bounce.InOut = new this(this.#Functions.Bounce.InOut);
   }
 
   static #Functions = class Functions
@@ -428,6 +418,18 @@ ACBC.Curve = class Curve
       }
     };
   };
+
+  static // Static initialization for #Instances above
+  {
+    this.#Instances.Linear = new this(this.#Functions.Linear);
+    this.#Instances.Parabola = new this(this.#Functions.Parabola);
+    this.#Instances.Quad.In = new this(this.#Functions.Quad.In);
+    this.#Instances.Quad.Out = new this(this.#Functions.Quad.Out);
+    this.#Instances.Quad.InOut = new this(this.#Functions.Quad.InOut);
+    this.#Instances.Bounce.In = new this(this.#Functions.Bounce.In);
+    this.#Instances.Bounce.Out = new this(this.#Functions.Bounce.Out);
+    this.#Instances.Bounce.InOut = new this(this.#Functions.Bounce.InOut);
+  }
 };
 
 
