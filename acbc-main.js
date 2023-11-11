@@ -90,7 +90,8 @@ ACBC.Roles =
       Glasses: ["#111", "#000"],
       Earrings: null,
       Lipstick: ["#111", "Default"],
-      Belt: ["#FF003D", "#999", "Default"],
+      Belt: ["#80001F", "#FFF"],
+      // Belt: ["#FF003D", "#999", "Default"],
     },
   },
   Elite:
@@ -112,7 +113,8 @@ ACBC.Roles =
       Glasses: ["#111", "#FF0091"],
       Earrings: null,
       Lipstick: ["#111", "Default"],
-      Belt: ["#0A0A0A", "#999", "Default"],
+      Belt: ["#0A0A0A", "#FFF"],
+      // Belt: ["#0A0A0A", "#999", "Default"],
     }
   },
   Command:
@@ -134,7 +136,8 @@ ACBC.Roles =
       Glasses: ["#111", "#000"],
       Earrings: null,
       Lipstick: ["#800", "Default"],
-      Belt: ["#0A0A0A", "#999", "Default"],
+      Belt: ["#0A0A0A", "#FFF"],
+      // Belt: ["#0A0A0A", "#999", "Default"],
     },
   },
   Engineering:
@@ -156,7 +159,8 @@ ACBC.Roles =
       Glasses: ["#111", "#FFD900"],
       Earrings: "#FFD900",
       Lipstick: ["#111", "Default"],
-      Belt: ["#0A0A0A", "#999", "Default"],
+      Belt: ["#0A0A0A", "#FFF"],
+      // Belt: ["#0A0A0A", "#999", "Default"],
     },
   },
   Stealth:
@@ -178,7 +182,8 @@ ACBC.Roles =
       Glasses: ["#111", "#000"],
       Earrings: null,
       Lipstick: ["#111", "Default"],
-      Belt: ["#0A0A0A", "#999", "Default"],
+      Belt: ["#0A0A0A", "#FFF"],
+      // Belt: ["#0A0A0A", "#999", "Default"],
     },
   },
   Science:
@@ -200,7 +205,8 @@ ACBC.Roles =
       Glasses: ["#111", "#00A5FF"],
       Earrings: null,
       Lipstick: ["#111", "Default"],
-      Belt: ["#0A0A0A", "#999", "Default"],
+      Belt: ["#0A0A0A", "#FFF"],
+      // Belt: ["#0A0A0A", "#999", "Default"],
     },
   },
   Medical:
@@ -222,7 +228,8 @@ ACBC.Roles =
       Glasses: ["#111", "#000"],
       Earrings: null,
       Lipstick: ["#800", "Default"],
-      Belt: ["#0A0A0A", "#999", "Default"],
+      Belt: ["#0A0A0A", "#FFF"],
+      // Belt: ["#0A0A0A", "#999", "Default"],
     },
   },
 };
@@ -1788,7 +1795,9 @@ ACBC.ActionRole = function(roleName, C, includeArmor = false, makeover = true)
 
   let colors = role.Colors;
 
-  InventoryWear(C, "Glitter", "ClothAccessory", colors.Glitter,
+  // InventoryWear(C, "Glitter", "ClothAccessory", colors.Glitter,
+  //   null, null, null, false);
+  let belt = InventoryWear(C, "LargeBelt", "ClothAccessory", colors.Belt,
     null, null, null, false);
   InventoryWear(C, "Pantyhose1", "SuitLower", colors.Pantyhose,
     null, null, null, false);
@@ -1811,7 +1820,9 @@ ACBC.ActionRole = function(roleName, C, includeArmor = false, makeover = true)
   InventoryWear(C, "JewelrySet", "Jewelry", colors.Earrings,
     null, null, null, false);
   
-  TypedItemSetOptionByName(C, "ClothAccessory", "StarsBoth", true);
+  // TypedItemSetOptionByName(C, "ClothAccessory", "StarsBoth", true);
+  belt.Property.OverridePriority = 27;
+  TypedItemSetOptionByName(C, "ClothAccessory", "Fit", true);
   ModularItemSetOptionByName(C, "Jewelry", "e3a3n0f0", true);
   CharacterAppearanceSetColorForGroup(C, colors.Lipstick, "Mouth");
 
@@ -1867,22 +1878,22 @@ ACBC.ActionRole = function(roleName, C, includeArmor = false, makeover = true)
     }, false);
   }
 
-  let belt = InventoryWear(C, "ThinLeatherStraps", "ItemTorso",
-    colors.Belt, 0, C.MemberNumber,
-    {
-      Color: colors.Belt.join(),
-      Description: "For the waist. Looks good on a leotard",
-      Item: "ThinLeatherStraps",
-      Lock: "",
-      MemberName: CharacterNickname(C),
-      MemberNumber: C.MemberNumber,
-      Name: "Belt",
-      OverridePriority: 24,
-      Private: false,
-      Property: "Malleable",
-      Type: "Waist",
-    }, false);
-  belt.Property.OverridePriority = 24;
+  // let belt = InventoryWear(C, "ThinLeatherStraps", "ItemTorso",
+  //   colors.Belt, 0, C.MemberNumber,
+  //   {
+  //     Color: colors.Belt.join(),
+  //     Description: "For the waist. Looks good on a leotard",
+  //     Item: "ThinLeatherStraps",
+  //     Lock: "",
+  //     MemberName: CharacterNickname(C),
+  //     MemberNumber: C.MemberNumber,
+  //     Name: "Belt",
+  //     OverridePriority: 24,
+  //     Private: false,
+  //     Property: "Malleable",
+  //     Type: "Waist",
+  //   }, false);
+  // belt.Property.OverridePriority = 24;
   
   if (makeover && C.IsNpc())
     ACBC.NpcMakeover(C, false);
@@ -1906,12 +1917,12 @@ ACBC.ActionArmor = function(C, colors, internal = false)
 
   InventoryWear(C, "MistressTop", "Cloth", colors.ArmorTop,
     null, null, null, false);
-  InventoryWear(C, "Glitter", "ClothAccessory", colors.Glitter,
-    null, null, null, false);
+  // InventoryWear(C, "Glitter", "ClothAccessory", colors.Glitter,
+  //   null, null, null, false);
   InventoryWear(C, "MistressBottom", "ClothLower", colors.ArmorBottom,
     null, null, null, false);
 
-  TypedItemSetOptionByName(C, "ClothAccessory", "StarsBoth", true);
+  // TypedItemSetOptionByName(C, "ClothAccessory", "StarsBoth", true);
 
   if (internal) return;
 
