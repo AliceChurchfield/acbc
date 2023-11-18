@@ -2246,11 +2246,12 @@ ACBC.WearRandomFave = function(C, groupName, difficulty,
   let crafts = C.Crafting.filter(
     craft =>
     {
+      if (!craft) return false;
       if (craft.Item !== selectedName) return false;
       if (!craft.Type) return true;
 
       let asset = AssetGet(C.AssetFamily, groupName, selectedName);
-      return asset.AllowType.includes(craft.Type);
+      return asset.AllowTypes.includes(craft.Type);
     });
   crafts.push(null);
   let selectedCraft = Private.GetRandomFromArray(crafts);
