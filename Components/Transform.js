@@ -130,7 +130,7 @@ ACBC.DrawImageExTx = function(args, next)
 
 
 ACBC.HookFunction("DrawCharacter", -100, ACBC.DrawCharacterTx, "Transform");
-ACBC.HookFunction("DrawImageEx", -100, ACBC.DrawImageExTx, "Transform");
+// ACBC.HookFunction("DrawImageEx", -100, ACBC.DrawImageExTx, "Transform");
 
 
 console.log(" * Transform.js loaded.");
