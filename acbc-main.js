@@ -2308,26 +2308,46 @@ ACBC.CharacterSetFacialExpressionEyebrowFix = function(args, next)
   if (AssetGroup !== "Eyebrows")
     return next(args);
 
-  let eyebrowColor = C.Appearance.find(
-    item => item.Asset.Group.Name === "Eyebrows").Color;
+  let eyebrows = C.Appearance.find(
+    item => item.Asset.Group.Name === "Eyebrows");
+  let eyebrowColor = eyebrows.Color;
   
-  let returnValue = next(args);
+	// A normal eye expression is triggered for both eyes
+	if (AssetGroup == "Eyes") CharacterSetFacialExpression(C, "Eyes2", Expression, Timer, Color);
+	if (AssetGroup == "Eyes1") AssetGroup = "Eyes";
 
-  CharacterAppearanceSetColorForGroup(C, eyebrowColor, "Eyebrows");
+	const item = InventoryGet(C, AssetGroup);
+	if (!item || !item.Asset.Group.AllowExpression) return;
+
+	if (Expression != null && !item.Asset.Group.AllowExpression.includes(Expression)) return;
+
+	if (!item.Property) item.Property = {};
+	if (item.Property.Expression == Expression && (!Color || item.Color == Color)) return;
+
+	item.Property.Expression = Expression;
+	if (Color && CommonColorIsValid(Color)) item.Color = Color;
+	// Remove all queued expression for that group if it's not coming from the queue
+	if (!fromQueue && C.ExpressionQueue) {
+		C.ExpressionQueue = C.ExpressionQueue.filter(({ Group }) => Group !== AssetGroup);
+	}
+	// We can't have timers on the null/default expression.
+	if (Timer != null && Expression != null) {
+		TimerExpressionQueuePush(C, AssetGroup, Math.round(CurrentTime + Timer * 1000), Expression);
+	}
+    
+  eyebrows.Color = eyebrowColor;
 
 	const inChatRoom = ServerPlayerIsInChatRoom();
 	const isTransient = Timer != null || fromQueue;
 
 	CharacterRefresh(C, !inChatRoom && !isTransient);
-	if (inChatRoom) {
-		if (isTransient || C.IsPlayer()) {
+	if (inChatRoom)
+  {
+		if (isTransient || C.IsPlayer())
 			ChatRoomCharacterExpressionUpdate(C, AssetGroup);
-		} else {
+		else
 			ChatRoomCharacterUpdate(C);
-		}
 	}
-
-  return returnValue;
 };
 
 
