@@ -2298,18 +2298,34 @@ ACBC.EyebrowFix = function()
  */
 ACBC.CharacterSetFacialExpressionEyebrowFix = function(args, next)
 {
-  let eyebrowColor = Player.Appearance.find(
+  let C = args[0];
+  let AssetGroup = args[1];
+  let Expression = args[2];
+  let Timer = args[3];
+  let Color = args[4];
+  let fromQueue = args[5];
+
+  if (AssetGroup !== "Eyebrows")
+    return next(args);
+
+  let eyebrowColor = C.Appearance.find(
     item => item.Asset.Group.Name === "Eyebrows").Color;
   
   let returnValue = next(args);
 
-  CharacterAppearanceSetColorForGroup(Player, eyebrowColor, "Eyebrows");
+  CharacterAppearanceSetColorForGroup(C, eyebrowColor, "Eyebrows");
 
 	const inChatRoom = ServerPlayerIsInChatRoom();
+	const isTransient = Timer != null || fromQueue;
 
-	CharacterRefresh(Player, !inChatRoom);
-	if (inChatRoom)
-    ChatRoomCharacterExpressionUpdate(Player, "Eyebrows");
+	CharacterRefresh(C, !inChatRoom && !isTransient);
+	if (inChatRoom) {
+		if (isTransient || C.IsPlayer()) {
+			ChatRoomCharacterExpressionUpdate(C, AssetGroup);
+		} else {
+			ChatRoomCharacterUpdate(C);
+		}
+	}
 
   return returnValue;
 };
