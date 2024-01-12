@@ -516,6 +516,7 @@ Private.Initialize = async function()
   Private.KidnappingFavoritesSetup();
   Private.ActionRoleSetup();
   Private.FbcEmoteTriggerSetup();
+  ACBC.EyebrowFix();
 
   ACBC.CharacterSetup(Player);
   window.Acbca = Player.Acbca;
@@ -2187,6 +2188,128 @@ ACBC.CheckDoubleStars = function(Ca, Cb)
   outputStr += `  Total: ${perf.length + near.length}`;
 
   console.log(outputStr);
+};
+
+
+ACBC.PrintBio = function(C)
+{
+  C = ACBC.Find(C);
+  
+  if (!C) return;
+
+  let bio = C.Description;
+  
+  if (!bio || bio === "")
+    console.log(`(%c${CharacterNickname(C)}'s bio is empty.)`,
+      "color: #FFFFFF80; font-style: italic;");
+  else
+    console.log(bio);
+};
+
+
+ACBC.Compatibility = function(Ca, Cb, excludeHandheld = true)
+{
+  Ca = ACBC.Find(Ca);
+  if (!Ca) return;
+
+  Cb = ACBC.Find(Cb);
+  if (!Cb) return;
+
+  if (Ca === Cb) return;
+
+  // Filter down A's faves to include just the ones where...
+    // given that A fave, there is some item in B's faves where...
+      // given that B fave's properties, every one of them...
+        // matches the properties of the A fave
+  let perf = Ca.FavoriteItems.filter(
+    aFave => !(aFave.Group === "ItemHandheld" && excludeHandheld) &&
+    Cb.FavoriteItems.some(
+      bFave => Object.keys(aFave).every(
+        key => aFave[key] === bFave[key])));
+  // The result of this is an array that consists only of the perfect matches
+
+  if (excludeHandheld)
+    perf = perf.filter(
+      fave => );
+
+  // For every item in the perfect matches, combine its group and name to make
+  //   a unique key out of it. We'll use this so we don't have duplicates later
+  let nearKeys = perf.map(match => `${match.Group}${match.Name}`);
+
+  // Filter down A's faves to include just the ones where:
+    // given that A fave, there is at least one item in B's faves where:
+      // given that B fave, the group and name match the A fave
+  let near = Ca.FavoriteItems.filter(
+    ai => !(ai.Group === "ItemHandheld" && excludeHandheld) &&
+    Cb.FavoriteItems.some(
+      bi => ai.Group === bi.Group && ai.Name === bi.Name))
+    // Then take the filtered list of matches and generate an array as follows:
+    .flatMap(
+    match =>
+    {
+      // Create a unique key like the ones we made from the perfect matches
+      let nearKey = `${match.Group}${match.Name}`;
+      // If this key is already in the list we made before, don't add anything
+      if (nearKeys.includes(nearKey))
+        return [];
+      // Otherwise, push that key into the list and then add the match
+      nearKeys.push(nearKey);
+      return match;
+    });
+  // The result of this is an array that contains only the near matches: the
+  //   items where both characters have the item itself starred for that group,
+  //   but they didn't both star the same "type" (i.e. cleave, OTM, OTN, etc.)
+  
+  // Finally, build a big ol string out of the
+  //   results and print it to the console
+  let outputStr = `${CharacterNickname(Ca)} and ${CharacterNickname(Cb)}\n`;
+  outputStr += `  Perfect Matches: ${perf.length}\n`;
+
+  for (const match of perf)
+  {
+    let typeStr = match.Type ? ` as ${match.Type}` : "";
+    outputStr += `   ♥ ${match.Name} on ${match.Group}${typeStr}\n`;
+  }
+
+  outputStr += `  Near Matches: ${near.length}\n`;
+
+  for (const match of near)
+    outputStr += `   • ${match.Name} on ${match.Group}\n`;
+  
+  outputStr += `  Total: ${perf.length + near.length}`;
+
+  console.log(outputStr);
+};
+
+
+ACBC.EyebrowFix = function()
+{
+  ACBC.HookFunction("CharacterSetFacialExpression", 0,
+    ACBC.CharacterSetFacialExpressionEyebrowFix, "ACBC");
+};
+
+
+/**
+ * @param {Array} args - The arguments to pass to next
+ * @param {(args: Array) => void} next - The next function in the hook chain
+ * @returns {void} - Nothing
+ */
+ACBC.CharacterSetFacialExpressionEyebrowFix = function(args, next)
+{
+  let eyebrowColor = Player.Appearance.find(
+    item => item.Asset.Group.Name === "Eyebrows").Color;
+  
+  let returnValue = next(args);
+
+  CharacterAppearanceSetColorForGroup(Player, eyebrowColor, "Eyebrows");
+
+	const inChatRoom = ServerPlayerIsInChatRoom();
+
+	CharacterRefresh(Player, !inChatRoom);
+	if (inChatRoom)
+    ChatRoomCharacterExpressionUpdate(C, "Eyebrows");
+
+  return returnValue;
 };
 
 
