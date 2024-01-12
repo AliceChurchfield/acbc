@@ -2309,7 +2309,7 @@ ACBC.CharacterSetFacialExpressionEyebrowFix = function(args, next)
 
 	CharacterRefresh(Player, !inChatRoom);
 	if (inChatRoom)
-    ChatRoomCharacterExpressionUpdate(C, "Eyebrows");
+    ChatRoomCharacterExpressionUpdate(Player, "Eyebrows");
 
   return returnValue;
 };
