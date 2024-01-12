@@ -2207,6 +2207,7 @@ ACBC.PrintBio = function(C)
 };
 
 
+/*
 ACBC.Compatibility = function(Ca, Cb, excludeHandheld = true)
 {
   Ca = ACBC.Find(Ca);
@@ -2280,6 +2281,7 @@ ACBC.Compatibility = function(Ca, Cb, excludeHandheld = true)
 
   console.log(outputStr);
 };
+*/
 
 
 ACBC.EyebrowFix = function()
