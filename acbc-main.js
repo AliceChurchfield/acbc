@@ -518,8 +518,65 @@ Private.Initialize = async function()
   Private.FbcEmoteTriggerSetup();
   ACBC.EyebrowFix();
 
+  Commands.push(
+  {
+    Tag: "unhide",
+    Action: args => Private.ExecuteUnHideCommand(args),
+    Description: "Adds the given item categories to your UnHide script.",
+  },
+  {
+    Tag: "removeunhide",
+    Action: args => Private.ExecuteRemoveUnHideCommand(args),
+    Description: "Removes the given item categories from your UnHide script.",
+  },
+  {
+    Tag: "bio",
+    Action: args => {if (args.length <= 0) return; ACBC.PrintBio(args[0])},
+    Description: "Prints the given character's bio to the browser console.",
+  },
+  {
+    Tag: "matches",
+    Action: args => {if (args.length <= 0) return; ACBC.CheckDoubleStars(args[0])},
+    Description: "Prints a restraint preference compatibility report with " +
+      "the given character to the browser console.", 
+  },
+  {
+    Tag: "checkbody",
+    Action: args => {if (args.length <= 0) return; ACBC.CheckBody(args[0])},
+    Description: "Prints the upper and lower body size of the given " +
+      "character to the browser console.",
+  },
+  {
+    Tag: "check",
+    Action: args =>
+    {
+      if (args.length <= 0) return;
+      ACBC.PrintBio(args[0]);
+      ACBC.CheckDoubleStars(args[0]);
+      ACBC.CheckBody(args[0]);
+    },
+    Description: "Prints the bio, a restraint preference compatibility " +
+      "report, and the upper and lower body size of the given character " +
+      "to the browser console.",
+  },
+  );
+
   ACBC.CharacterSetup(Player);
   window.Acbca = Player.Acbca;
+};
+
+
+Private.ExecuteUnHideCommand = function(args)
+{
+  if (args.length <= 0) return;
+  ACBC.UnHide(args);
+};
+
+
+Private.ExecuteRemoveUnHideCommand = function(args)
+{
+  if (args.length <= 0) return;
+  ACBC.RemoveUnHide(args);
 };
 
 
@@ -610,6 +667,7 @@ ACBC.FindAll = function(C)
     //   from the main Character array.
     if (ServerPlayerIsInChatRoom())
     {
+      let lower = C.toLowerCase();
       // Start by trying to find matches via nickname. If that gets no results,
       //   then check names. This way, if there is one person in a room whose
       //   nickname is the identifier, and another whose name is the identifier,
@@ -617,9 +675,10 @@ ACBC.FindAll = function(C)
       //   ambiguous situation.
       let matches = Character.filter((e) =>
       {
+        let nick = CharacterNickname(e);
         // Include only characters with the right name AND whose member number
         //   is found in ChatRoomData.Character
-        return CharacterNickname(e) === C &&
+        return (nick === C || nick.toLowerCase() === lower) &&
           ChatRoomData.Character.some(f => f.MemberNumber === e.MemberNumber);
       });
 
@@ -628,7 +687,7 @@ ACBC.FindAll = function(C)
 
       matches = Character.filter((e) =>
       {
-        return e.Name === C &&
+        return (e.Name === C || e.Name.toLowerCase() === lower) &&
           ChatRoomData.Character.some(f => f.MemberNumber === e.MemberNumber);
       });
       
@@ -2298,12 +2357,12 @@ ACBC.EyebrowFix = function()
  */
 ACBC.CharacterSetFacialExpressionEyebrowFix = function(args, next)
 {
-  let C = args[0];
-  let AssetGroup = args[1];
-  let Expression = args[2];
-  let Timer = args[3];
-  let Color = args[4];
-  let fromQueue = args[5];
+  let C           = args[0];
+  let AssetGroup  = args[1];
+  let Expression  = args[2];
+  let Timer       = args[3];
+  let Color       = args[4];
+  let fromQueue   = args[5];
 
   if (AssetGroup !== "Eyebrows")
     return next(args);
@@ -2348,6 +2407,127 @@ ACBC.CharacterSetFacialExpressionEyebrowFix = function(args, next)
 		else
 			ChatRoomCharacterUpdate(C);
 	}
+};
+
+
+ACBC.UnHide = function(names, C)
+{
+  C = ACBC.Find(C);
+  if (!C) return;
+
+  if (typeof names === "string")
+    names = [names];
+  else if (!Array.isArray(names)) return;
+
+  names = names.map(name =>
+    AssetGroup.find(group =>
+      group.Name.toLowerCase() === name)?.Name)
+      .filter(name => typeof name === "string");
+  
+  if (names.length <= 0) return;
+
+  let script = InventoryGet(C, "ItemScript");
+
+  if (!script)
+    script = InventoryWear(C, "Script", "ItemScript");
+
+  script.Property = script.Property || {};
+  let unHide = script.Property.UnHide || [];
+  let changes = 0;
+  names.forEach(name => 
+  {
+    if (!unHide.includes(name))
+    {
+      unHide.push(name);
+      ++changes;
+    }
+  });
+
+  if (changes <= 0) return;
+
+  script.Property.UnHide = unHide;
+  CharacterScriptRefresh(C);
+};
+
+
+ACBC.RemoveUnHide = function(names, C)
+{
+  C = ACBC.Find(C);
+  if (!C) return;
+
+  if (typeof names === "string")
+    names = [names];
+  else if (!Array.isArray(names)) return;
+
+  names = names.map(name =>
+    AssetGroup.find(group =>
+      group.Name.toLowerCase() === name)?.Name)
+      .filter(name => typeof name === "string");
+  
+  if (names.length <= 0) return;
+
+  let script = InventoryGet(C, "ItemScript");
+  if (!script?.Property?.UnHide) return;
+  if (script.Property.UnHide.length <= 0) return;
+
+  let unHide = [];
+  let changes = 0;
+  script.Property.UnHide.forEach(name =>
+  {
+    if (names.includes(name))
+      ++changes;
+    else
+      unHide.push(name);
+  });
+  
+  if (changes <= 0) return;
+  
+  script.Property.UnHide = unHide;
+  CharacterScriptRefresh(C);
+};
+
+
+ACBC.GetHides = function(C)
+{
+  C = ACBC.Find(C);
+  if (!C) return null;
+
+  let hidden = [];
+  C.Appearance.forEach(item =>
+    item.Asset.Hide?.forEach(hide =>
+    {
+      if (!hidden.includes(hide))
+        hidden.push(hide);
+    })
+  );
+  
+  return hidden;
+};
+
+
+ACBC.PrintHides = function(C)
+{
+  let hides = ACBC.GetHides(C);
+  console.log(hides);
+};
+
+
+ACBC.GetUnHides = function(C)
+{
+  C = ACBC.Find(C);
+  if (!C) return null;
+
+  let script = InventoryGet(C, "ItemScript");
+  if (!script?.Property?.UnHide) return [];
+
+  return script.Property.UnHide;
+};
+
+
+ACBC.PrintUnHides = function(C)
+{
+  let unHides = ACBC.GetUnHides(C);
+  console.log(unHides);
 };
 
 
